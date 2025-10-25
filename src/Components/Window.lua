@@ -228,10 +228,14 @@ return function(Serenity, Config)
         Window:Destroy()
     end)
 
-    -- Update tab holder size
-    Window.TabHolder:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, Window.TabHolder.UIListLayout.AbsoluteContentSize.Y)
-    end)
+    -- Update tab holder size (FIXED)
+    local function updateTabHolderSize()
+        local contentSize = Window.TabHolder.UIListLayout.AbsoluteContentSize
+        Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, contentSize.Y)
+    end
+
+    Window.TabHolder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
+    updateTabHolderSize() -- Initial update
 
     function Window:AddTab(config)
         local tabConfig = config or {}
@@ -277,7 +281,7 @@ return function(Serenity, Config)
         function tab:AddSection(sectionConfig)
             local sectionFrame = Serenity.Creator.New("Frame", {
                 Name = sectionConfig.Title .. "Section",
-                Size = UDim2.new(1, -10, 0, 0),
+                Size = UDim2.new(1, -10, 0, 60), -- Fixed initial size
                 BackgroundColor3 = Color3.fromRGB(31, 31, 31),
                 Parent = tabContent
             }, {
@@ -466,10 +470,18 @@ return function(Serenity, Config)
                 return buttonObj
             end
 
-            -- Update section size when elements are added
-            elementsContainer:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                sectionFrame.Size = UDim2.new(1, -10, 0, elementsContainer.AbsoluteContentSize.Y + 45)
-            end)
+            -- Update section size when elements are added (FIXED)
+            local function updateSectionSize()
+                local contentSize = elementsContainer.AbsoluteSize
+                sectionFrame.Size = UDim2.new(1, -10, 0, contentSize.Y + 45)
+                
+                -- Update tab content size
+                local tabContentSize = tabContent.AbsoluteSize
+                tabContent.CanvasSize = UDim2.new(0, 0, 0, tabContent.UIListLayout.AbsoluteContentSize.Y)
+            end
+
+            -- Use a different approach for size updates
+            game:GetService("RunService").Heartbeat:Connect(updateSectionSize)
 
             table.insert(tab.Sections, section)
             return section
