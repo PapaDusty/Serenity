@@ -63,10 +63,9 @@ Serenity.Creator = Creator
 function Serenity:CreateWindow(config)
     config = config or {}
     
-    -- Pass Serenity as a parameter to Window
     local WindowModule = Serenity._loadModule("src/Components/Window.lua")
     if WindowModule then
-        return WindowModule(Serenity, config)
+        return WindowModule(Serenity, config)  -- Pass Serenity as first parameter
     else
         print("⚠️ Using fallback window")
         return self:_createFallbackWindow(config)
