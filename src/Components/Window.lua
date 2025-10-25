@@ -24,8 +24,30 @@ return function(Serenity, Config)
 
     local Dragging, DragInput, MousePos, StartPos = false
 
-    -- Load icon library
-    local IconLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Nebula-Icon-Library/master/main.lua"))()
+    -- Load icon library with error handling
+    local IconLibrary = nil
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Nebula-Icon-Library/master/main.lua"))()
+    end)
+    
+    if success then
+        IconLibrary = result
+        print("✅ Icon library loaded successfully")
+    else
+        print("⚠️ Icon library failed to load, using fallback")
+        IconLibrary = {
+            GetIcon = function(self, name, source)
+                -- Fallback icons
+                local fallbackIcons = {
+                    house = "10734961420", -- Default icon
+                    user = "10734961420",
+                    settings = "10734961420",
+                    home = "10734961420"
+                }
+                return fallbackIcons[name] or "10734961420"
+            end
+        }
+    end
 
     -- Create main window
     Window.ScreenGui = Serenity.Creator.New("ScreenGui", {
@@ -181,14 +203,6 @@ return function(Serenity, Config)
         })
     })
 
-    -- Tab selector (removed the blue line, we'll use a different approach)
-    Window.Selector = Serenity.Creator.New("Frame", {
-        Name = "Selector",
-        Size = UDim2.fromOffset(0, 0), -- Will be animated
-        BackgroundTransparency = 1,
-        Parent = Window.TabHolder
-    })
-
     -- Content area (adjusted for shorter titlebar)
     Window.ContentContainer = Serenity.Creator.New("Frame", {
         Name = "ContentContainer",
@@ -261,7 +275,7 @@ return function(Serenity, Config)
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
     updateTabHolderSize()
 
-    -- Function to get icon from library
+    -- Function to get icon from library with error handling
     local function getIcon(iconName, source)
         if not iconName or iconName == "" then
             return nil
@@ -271,14 +285,22 @@ return function(Serenity, Config)
             return IconLibrary:GetIcon(iconName, source or "Symbols")
         end)
         
-        return success and iconId or nil
+        if success and iconId then
+            return iconId
+        else
+            -- Fallback to default icon
+            return "10734961420"
+        end
     end
 
     function Window:AddTab(config)
         local tabConfig = config or {}
         
         -- Get icon if provided
-        local iconId = getIcon(tabConfig.Icon, tabConfig.IconSource)
+        local iconId = nil
+        if tabConfig.Icon then
+            iconId = getIcon(tabConfig.Icon, tabConfig.IconSource)
+        end
         
         -- Create tab button with premium styling
         local tabButton = Serenity.Creator.New("TextButton", {
@@ -674,7 +696,9 @@ return function(Serenity, Config)
                     TextTransparency = 0.4,
                     TextColor3 = Color3.fromRGB(200, 200, 200)
                 }):Play()
-                otherTab.Background.UIStroke.Transparency = 0.8
+                if otherTab.Background:FindFirstChild("UIStroke") then
+                    otherTab.Background.UIStroke.Transparency = 0.8
+                end
             end
             
             -- Show selected tab with premium animations
@@ -687,10 +711,12 @@ return function(Serenity, Config)
                 TextTransparency = 0,
                 TextColor3 = Color3.fromRGB(255, 255, 255)
             }):Play()
-            TweenService:Create(tab.Background.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Transparency = 0.3,
-                Color = Color3.fromRGB(100, 100, 255)
-            }):Play()
+            if tab.Background:FindFirstChild("UIStroke") then
+                TweenService:Create(tab.Background.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                    Transparency = 0.3,
+                    Color = Color3.fromRGB(100, 100, 255)
+                }):Play()
+            end
             
             Window.SelectedTab = tab.Index
         end
