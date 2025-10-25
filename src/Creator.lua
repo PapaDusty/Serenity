@@ -1,4 +1,3 @@
--- Simple Creator utility for Serenity UI
 local Creator = {}
 
 function Creator.New(className, properties, children)
@@ -21,10 +20,6 @@ function Creator.New(className, properties, children)
     end
     
     return instance
-end
-
-function Creator.AddSignal(signal, callback)
-    return signal:Connect(callback)
 end
 
 return Creator
