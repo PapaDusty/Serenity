@@ -1,4 +1,3 @@
--- Simple Window component
 return function(Config)
     local Serenity = require(script.Parent.Parent)
     
@@ -19,40 +18,23 @@ return function(Config)
     
     local window = {
         ScreenGui = screenGui,
-        Root = mainFrame,
-        Tabs = {}
+        Root = mainFrame
     }
     
     function window:AddTab(tabConfig)
-        print("Adding tab:", tabConfig.Title)
-        
-        local tab = {
-            Title = tabConfig.Title
-        }
-        
+        local tab = {}
         function tab:AddSection(sectionConfig)
-            print("Adding section:", sectionConfig.Title)
-            
-            local section = {
-                Title = sectionConfig.Title
-            }
-            
+            local section = {}
             function section:AddToggle(toggleConfig)
-                print("Adding toggle:", toggleConfig.Title)
-                -- Toggle implementation will be added later
+                -- Will be implemented by fallback
                 return {}
             end
-            
             function section:AddButton(buttonConfig)
-                print("Adding button:", buttonConfig.Title)
-                -- Button implementation will be added later
+                -- Will be implemented by fallback
                 return {}
             end
-            
             return section
         end
-        
-        table.insert(window.Tabs, tab)
         return tab
     end
     
