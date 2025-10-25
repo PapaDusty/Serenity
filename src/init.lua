@@ -17,13 +17,13 @@ local Serenity = {
 Serenity.Options = {}
 
 -- Load dependencies
-local Creator = loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/refs/heads/main/src/Creator.lua"))()
-local Acrylic = loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/refs/heads/main/src/Acrylic/init.lua"))()
+local Creator = loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/Creator.lua"))()
+local Acrylic = loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/Acrylic/init.lua"))()
 
 function Serenity:CreateWindow(config)
     config = config or {}
     
-    local Window = loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/refs/heads/main/src/Components/Window.lua"))()
+    local Window = loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/Components/Window.lua"))()
     return Window(config)
 end
 
