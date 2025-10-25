@@ -13,7 +13,8 @@ return function(Serenity, Config)
         CurrentPos = 0,
         TabWidth = Config.TabWidth or 160,
         Tabs = {},
-        CurrentTab = nil
+        CurrentTab = nil,
+        SelectedTab = 1
     }
 
     Window.Position = UDim2.fromOffset(
@@ -219,41 +220,71 @@ return function(Serenity, Config)
         end
     end)
 
-    -- Button functionality
+    -- Button functionality (FIXED - no more spam)
+    local destroyDebounce = false
+    CloseButton.MouseButton1Click:Connect(function()
+        if not destroyDebounce then
+            destroyDebounce = true
+            Window:Destroy()
+        end
+    end)
+
     MinButton.MouseButton1Click:Connect(function()
         Window:Minimize()
     end)
 
-    CloseButton.MouseButton1Click:Connect(function()
-        Window:Destroy()
-    end)
-
-    -- Update tab holder size (FIXED)
+    -- Update tab holder size
     local function updateTabHolderSize()
-        local contentSize = Window.TabHolder.UIListLayout.AbsoluteContentSize
-        Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, contentSize.Y)
+        local layout = Window.TabHolder:FindFirstChild("UIListLayout")
+        if layout then
+            Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
+        end
     end
 
-    Window.TabHolder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
-    updateTabHolderSize() -- Initial update
+    local layout = Window.TabHolder:WaitForChild("UIListLayout")
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
+    updateTabHolderSize()
 
     function Window:AddTab(config)
         local tabConfig = config or {}
         
-        -- Create tab button
+        -- Create tab button with improved styling
         local tabButton = Serenity.Creator.New("TextButton", {
             Name = tabConfig.Title .. "Tab",
-            Size = UDim2.new(1, 0, 0, 35),
-            BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-            Text = tabConfig.Title,
-            TextColor3 = Color3.fromRGB(255, 255, 255),
-            TextSize = 14,
-            Font = Enum.Font.Gotham,
+            Size = UDim2.new(1, 0, 0, 34),
+            BackgroundTransparency = 1,
+            Text = "",
             Parent = Window.TabHolder
+        })
+
+        -- Tab background
+        local tabBackground = Serenity.Creator.New("Frame", {
+            Name = "Background",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+            BackgroundTransparency = 1, -- Start transparent
+            Parent = tabButton
         }, {
             Serenity.Creator.New("UICorner", {
                 CornerRadius = UDim.new(0, 6)
             })
+        })
+
+        -- Tab label
+        local tabLabel = Serenity.Creator.New("TextLabel", {
+            Name = "Label",
+            AnchorPoint = Vector2.new(0, 0.5),
+            Position = UDim2.new(0, 12, 0.5, 0),
+            Size = UDim2.new(1, -12, 1, 0),
+            BackgroundTransparency = 1,
+            Text = tabConfig.Title,
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            TextTransparency = 0.3, -- Start semi-transparent
+            TextSize = 12,
+            Font = Enum.Font.Gotham,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center,
+            Parent = tabButton
         })
 
         -- Create tab content
@@ -261,27 +292,50 @@ return function(Serenity, Config)
             Name = tabConfig.Title .. "Content",
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
-            ScrollBarThickness = 4,
+            ScrollBarThickness = 3,
+            ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255),
+            ScrollBarImageTransparency = 0.95,
             CanvasSize = UDim2.new(0, 0, 0, 0),
             Visible = (#Window.Tabs == 0), -- First tab is visible
             Parent = Window.ContentContainer
         }, {
             Serenity.Creator.New("UIListLayout", {
                 Padding = UDim.new(0, 10)
+            }),
+            Serenity.Creator.New("UIPadding", {
+                PaddingTop = UDim.new(0, 5),
+                PaddingBottom = UDim.new(0, 5),
+                PaddingLeft = UDim.new(0, 5),
+                PaddingRight = UDim.new(0, 5)
             })
         })
 
         local tab = {
             Button = tabButton,
+            Background = tabBackground,
+            Label = tabLabel,
             Content = tabContent,
             Sections = {},
-            Name = tabConfig.Title
+            Name = tabConfig.Title,
+            Index = #Window.Tabs + 1
         }
+
+        -- Update content size function
+        local function updateContentSize()
+            local contentLayout = tabContent:FindFirstChild("UIListLayout")
+            if contentLayout then
+                tabContent.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 10)
+            end
+        end
+
+        local contentLayout = tabContent:WaitForChild("UIListLayout")
+        contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateContentSize)
+        updateContentSize()
 
         function tab:AddSection(sectionConfig)
             local sectionFrame = Serenity.Creator.New("Frame", {
                 Name = sectionConfig.Title .. "Section",
-                Size = UDim2.new(1, -10, 0, 60), -- Fixed initial size
+                Size = UDim2.new(1, -10, 0, 0), -- Auto-size
                 BackgroundColor3 = Color3.fromRGB(31, 31, 31),
                 Parent = tabContent
             }, {
@@ -325,6 +379,18 @@ return function(Serenity, Config)
                 Frame = sectionFrame,
                 Container = elementsContainer
             }
+
+            -- Update section size
+            local function updateSectionSize()
+                local elementsLayout = elementsContainer:FindFirstChild("UIListLayout")
+                if elementsLayout then
+                    sectionFrame.Size = UDim2.new(1, -10, 0, elementsLayout.AbsoluteContentSize.Y + 45)
+                end
+            end
+
+            local elementsLayout = elementsContainer:WaitForChild("UIListLayout")
+            elementsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionSize)
+            updateSectionSize()
 
             function section:AddToggle(toggleConfig)
                 local toggleFrame = Serenity.Creator.New("Frame", {
@@ -470,48 +536,49 @@ return function(Serenity, Config)
                 return buttonObj
             end
 
-            -- Update section size when elements are added (FIXED)
-            local function updateSectionSize()
-                local contentSize = elementsContainer.AbsoluteSize
-                sectionFrame.Size = UDim2.new(1, -10, 0, contentSize.Y + 45)
-                
-                -- Update tab content size
-                local tabContentSize = tabContent.AbsoluteSize
-                tabContent.CanvasSize = UDim2.new(0, 0, 0, tabContent.UIListLayout.AbsoluteContentSize.Y)
-            end
-
-            -- Use a different approach for size updates
-            game:GetService("RunService").Heartbeat:Connect(updateSectionSize)
-
             table.insert(tab.Sections, section)
             return section
         end
 
-        -- Tab switching
-        tabButton.MouseButton1Click:Connect(function()
+        -- Tab selection function
+        local function selectTab()
+            -- Hide all tabs
             for _, otherTab in pairs(Window.Tabs) do
                 otherTab.Content.Visible = false
-            end
-            tabContent.Visible = true
-            
-            -- Update selector position
-            local tabIndex = table.find(Window.Tabs, tab)
-            if tabIndex then
-                local selectorPos = (tabIndex - 1) * 40
-                TweenService:Create(Window.Selector, TweenInfo.new(0.2), {
-                    Position = UDim2.fromOffset(0, selectorPos + 17)
+                TweenService:Create(otherTab.Background, TweenInfo.new(0.2), {
+                    BackgroundTransparency = 1
+                }):Play()
+                TweenService:Create(otherTab.Label, TweenInfo.new(0.2), {
+                    TextTransparency = 0.3
                 }):Play()
             end
-        end)
+            
+            -- Show selected tab
+            tabContent.Visible = true
+            TweenService:Create(tab.Background, TweenInfo.new(0.2), {
+                BackgroundTransparency = 0
+            }):Play()
+            TweenService:Create(tab.Label, TweenInfo.new(0.2), {
+                TextTransparency = 0
+            }):Play()
+            
+            -- Update selector position
+            local selectorPos = (tab.Index - 1) * 39
+            TweenService:Create(Window.Selector, TweenInfo.new(0.2), {
+                Position = UDim2.fromOffset(0, selectorPos + 17)
+            }):Play()
+            
+            Window.SelectedTab = tab.Index
+        end
+
+        -- Tab switching
+        tabButton.MouseButton1Click:Connect(selectTab)
 
         table.insert(Window.Tabs, tab)
         
         -- Select first tab
         if #Window.Tabs == 1 then
-            Window.CurrentTab = tab
-            TweenService:Create(Window.Selector, TweenInfo.new(0.2), {
-                Position = UDim2.fromOffset(0, 17)
-            }):Play()
+            selectTab()
         end
 
         return tab
@@ -523,7 +590,9 @@ return function(Serenity, Config)
     end
 
     function Window:Destroy()
-        Window.ScreenGui:Destroy()
+        if Window.ScreenGui and Window.ScreenGui.Parent then
+            Window.ScreenGui:Destroy()
+        end
     end
 
     return Window
