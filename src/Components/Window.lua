@@ -87,40 +87,47 @@ return function(Serenity, Config)
         Parent = TitleBar
     })
 
-    -- Title with icon (centered)
-    local TitleContainer = Serenity.Creator.New("Frame", {
-        Name = "TitleContainer",
-        Size = UDim2.new(0.4, 0, 1, 0),
-        Position = UDim2.new(0.5, 0, 0, 0),
-        AnchorPoint = Vector2.new(0.5, 0),
-        BackgroundTransparency = 1,
-        Parent = TitleBar
-    })
+-- Title container (same as yours)
+local TitleContainer = Serenity.Creator.New("Frame", {
+    Name = "TitleContainer",
+    Size = UDim2.new(0.4, 0, 1, 0),
+    Position = UDim2.new(0.5, 0, 0.5, 0), -- center vertically
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    BackgroundTransparency = 1,
+    Parent = TitleBar
+})
 
-    -- Title icon (bigger)
-    Serenity.Creator.New("ImageLabel", {
-        Name = "TitleIcon",
-        Size = UDim2.new(0, 22, 0, 22),
-        Position = UDim2.new(0, 0, 0.5, 0),
-        AnchorPoint = Vector2.new(0, 0.5),
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://118034688779559",
-        Parent = TitleContainer
-    })
+-- Layout to align icon + text horizontally and center them
+Serenity.Creator.New("UIListLayout", {
+    FillDirection = Enum.FillDirection.Horizontal,
+    HorizontalAlignment = Enum.HorizontalAlignment.Center,
+    VerticalAlignment = Enum.VerticalAlignment.Center,
+    Padding = UDim.new(0, 5),
+    Parent = TitleContainer
+})
 
-    -- Title text (centered with icon)
-    Serenity.Creator.New("TextLabel", {
-        Name = "Title",
-        Size = UDim2.new(1, -25, 1, 0),
-        Position = UDim2.new(0, 25, 0, 0),
-        BackgroundTransparency = 1,
-        Text = Config.Title or "Serenity UI",
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        TextSize = 14,
-        Font = Enum.Font.GothamBold,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = TitleContainer
-    })
+-- Title icon
+Serenity.Creator.New("ImageLabel", {
+    Name = "TitleIcon",
+    Size = UDim2.new(0, 22, 0, 22),
+    BackgroundTransparency = 1,
+    Image = "rbxassetid://118034688779559",
+    Parent = TitleContainer
+})
+
+-- Title text
+Serenity.Creator.New("TextLabel", {
+    Name = "Title",
+    AutomaticSize = Enum.AutomaticSize.X,
+    BackgroundTransparency = 1,
+    Text = Config.Title or "Serenity UI",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 14,
+    Font = Enum.Font.GothamBold,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    Parent = TitleContainer
+})
+
 
     -- Subtitle (on the left)
     Serenity.Creator.New("TextLabel", {
