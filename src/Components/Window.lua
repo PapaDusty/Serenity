@@ -90,7 +90,7 @@ return function(Serenity, Config)
     -- Title with icon (centered)
     local TitleContainer = Serenity.Creator.New("Frame", {
         Name = "TitleContainer",
-        Size = UDim2.new(0.6, 0, 1, 0),
+        Size = UDim2.new(0.4, 0, 1, 0),
         Position = UDim2.new(0.5, 0, 0, 0),
         AnchorPoint = Vector2.new(0.5, 0),
         BackgroundTransparency = 1,
@@ -100,8 +100,8 @@ return function(Serenity, Config)
     -- Title icon (bigger)
     Serenity.Creator.New("ImageLabel", {
         Name = "TitleIcon",
-        Size = UDim2.new(0, 20, 0, 20),
-        Position = UDim2.new(0, 10, 0.5, 0),
+        Size = UDim2.new(0, 22, 0, 22),
+        Position = UDim2.new(0, 0, 0.5, 0),
         AnchorPoint = Vector2.new(0, 0.5),
         BackgroundTransparency = 1,
         Image = "rbxassetid://118034688779559",
@@ -111,8 +111,8 @@ return function(Serenity, Config)
     -- Title text (centered with icon)
     Serenity.Creator.New("TextLabel", {
         Name = "Title",
-        Size = UDim2.new(1, -35, 1, 0),
-        Position = UDim2.new(0, 35, 0, 0),
+        Size = UDim2.new(1, -25, 1, 0),
+        Position = UDim2.new(0, 25, 0, 0),
         BackgroundTransparency = 1,
         Text = Config.Title or "Serenity UI",
         TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -224,7 +224,7 @@ return function(Serenity, Config)
         Parent = Window.Root
     }, {
         Serenity.Creator.New("UICorner", {
-            CornerRadius = UDim.new(0, 0, 0, 8)
+            CornerRadius = UDim.new(0, 8)
         })
     })
 
@@ -253,37 +253,38 @@ return function(Serenity, Config)
         })
     })
 
-    -- Player display name (bigger text)
+    -- Player display name (bigger and bolder text)
     Serenity.Creator.New("TextLabel", {
         Name = "PlayerName",
         Size = UDim2.new(0.5, -40, 1, 0),
         Position = UDim2.new(0, 45, 0, 0),
         BackgroundTransparency = 1,
         Text = player.DisplayName,
-        TextColor3 = Color3.fromRGB(200, 200, 200),
+        TextColor3 = Color3.fromRGB(255, 255, 255),
         TextSize = 14,
-        Font = Enum.Font.GothamSemibold,
+        Font = Enum.Font.GothamBold,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = Window.InfoContainer
     })
 
-     -- Guest text on the right
+    -- Guest text container
     local GuestContainer = Serenity.Creator.New("Frame", {
         Name = "GuestContainer",
-        Size = UDim2.new(0.3, 0, 1, 0),
-        Position = UDim2.new(0.7, 0, 0, 0),
+        Size = UDim2.new(0, 80, 1, 0),
+        Position = UDim2.new(1, -90, 0, 0),
         BackgroundTransparency = 1,
         Parent = Window.InfoContainer
     })
 
+    -- Guest text (white and bold)
     Serenity.Creator.New("TextLabel", {
         Name = "GuestText",
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
         Text = "Guest",
-        TextColor3 = Color3.fromRGB(150, 150, 150),
+        TextColor3 = Color3.fromRGB(255, 255, 255),
         TextSize = 12,
-        Font = Enum.Font.Gotham,
+        Font = Enum.Font.GothamBold,
         TextXAlignment = Enum.TextXAlignment.Right,
         Parent = GuestContainer
     })
@@ -292,8 +293,8 @@ return function(Serenity, Config)
     Serenity.Creator.New("Frame", {
         Name = "Underline",
         Size = UDim2.new(0.8, 0, 0, 1),
-        Position = UDim2.new(0.1, 0, 1, -2),
-        BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+        Position = UDim2.new(0.1, 0, 0.9, 0),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
         Parent = GuestContainer
     })
