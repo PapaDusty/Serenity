@@ -27,7 +27,7 @@ return function(Serenity, Config)
     -- Load icons from external file
     local Icons = {}
     local success, result = pcall(function()
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/icon.lua"))()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/PhosphorIcons.lua"))()
     end)
     
     if success and type(result) == "table" then
