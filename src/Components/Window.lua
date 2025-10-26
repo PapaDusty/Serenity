@@ -37,12 +37,12 @@ return function(Serenity, Config)
         print("⚠️ Icon library failed to load, using fallback")
         IconLibrary = {
             GetIcon = function(self, name, source)
-                -- Fallback icons
                 local fallbackIcons = {
                     house = "10734961420",
                     user = "10734961420",
                     settings = "10734961420",
                     home = "10734961420",
+                    sword = "10734961420",
                     chevron_down = "10734961420",
                     chevron_up = "10734961420"
                 }
@@ -76,7 +76,7 @@ return function(Serenity, Config)
         })
     })
 
-    -- Title bar (30% shorter)
+    -- Title bar
     local TitleBar = Serenity.Creator.New("Frame", {
         Name = "TitleBar",
         Size = UDim2.new(1, 0, 0, 28),
@@ -89,7 +89,7 @@ return function(Serenity, Config)
         })
     })
 
-    -- Title
+    -- Title with bolder font
     Serenity.Creator.New("TextLabel", {
         Name = "Title",
         Size = UDim2.new(0.5, 0, 1, 0),
@@ -98,12 +98,12 @@ return function(Serenity, Config)
         Text = Config.Title or "Serenity UI",
         TextColor3 = Color3.fromRGB(255, 255, 255),
         TextSize = 14,
-        Font = Enum.Font.GothamBold,
+        Font = Enum.Font.GothamBold, -- Bolder
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = TitleBar
     })
 
-    -- Subtitle
+    -- Subtitle with bolder font
     Serenity.Creator.New("TextLabel", {
         Name = "SubTitle",
         Size = UDim2.new(0.5, 0, 1, 0),
@@ -112,7 +112,7 @@ return function(Serenity, Config)
         Text = Config.SubTitle or "v" .. Serenity.Version,
         TextColor3 = Color3.fromRGB(150, 150, 150),
         TextSize = 11,
-        Font = Enum.Font.Gotham,
+        Font = Enum.Font.GothamSemibold, -- Bolder
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = TitleBar
     })
@@ -163,29 +163,20 @@ return function(Serenity, Config)
         })
     })
 
-    -- Tab navigation area
+    -- Tab navigation area (no border)
     Window.TabContainer = Serenity.Creator.New("Frame", {
         Name = "TabContainer",
         Size = UDim2.new(0, Window.TabWidth, 1, -78),
         Position = UDim2.fromOffset(10, 38),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+        BackgroundTransparency = 1,
         Parent = Window.Root
-    }, {
-        Serenity.Creator.New("UICorner", {
-            CornerRadius = UDim.new(0, 6)
-        }),
-        Serenity.Creator.New("UIStroke", {
-            Color = Color3.fromRGB(55, 55, 55),
-            Thickness = 1
-        })
     })
 
-    -- Tab buttons container
+    -- Tab buttons container (no border)
     Window.TabHolder = Serenity.Creator.New("ScrollingFrame", {
         Name = "TabHolder",
-        Size = UDim2.new(1, -10, 1, -10),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        AnchorPoint = Vector2.new(0.5, 0.5),
+        Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
         ScrollBarThickness = 0,
@@ -193,25 +184,32 @@ return function(Serenity, Config)
         Parent = Window.TabContainer
     }, {
         Serenity.Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 5)
+            Padding = UDim.new(0, 8)
         })
     })
 
-    -- Content area
-    Window.ContentContainer = Serenity.Creator.New("Frame", {
-        Name = "ContentContainer",
-        Size = UDim2.new(1, -Window.TabWidth - 20, 1, -78),
-        Position = UDim2.new(0, Window.TabWidth + 10, 0, 38),
-        BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+    -- Vertical divider between tabs and content
+    local VerticalDivider = Serenity.Creator.New("Frame", {
+        Name = "VerticalDivider",
+        Size = UDim2.new(0, 1, 1, -78),
+        Position = UDim2.new(0, Window.TabWidth + 5, 0, 38),
+        BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+        BorderSizePixel = 0,
         Parent = Window.Root
     }, {
         Serenity.Creator.New("UICorner", {
-            CornerRadius = UDim.new(0, 6)
-        }),
-        Serenity.Creator.New("UIStroke", {
-            Color = Color3.fromRGB(55, 55, 55),
-            Thickness = 1
+            CornerRadius = UDim.new(1, 0)
         })
+    })
+
+    -- Content area (no border)
+    Window.ContentContainer = Serenity.Creator.New("Frame", {
+        Name = "ContentContainer",
+        Size = UDim2.new(1, -Window.TabWidth - 25, 1, -78), -- Adjusted for divider
+        Position = UDim2.new(0, Window.TabWidth + 15, 0, 38), -- Adjusted for divider
+        BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+        BackgroundTransparency = 1,
+        Parent = Window.Root
     })
 
     -- Dragging functionality
@@ -290,7 +288,7 @@ return function(Serenity, Config)
         if success and iconId then
             return iconId
         else
-            return "10734961420" -- Default checkmark icon
+            return "10734961420"
         end
     end
 
@@ -306,13 +304,13 @@ return function(Serenity, Config)
         -- Create tab button
         local tabButton = Serenity.Creator.New("TextButton", {
             Name = tabConfig.Title .. "Tab",
-            Size = UDim2.new(1, 0, 0, 36),
+            Size = UDim2.new(1, 0, 0, 40),
             BackgroundTransparency = 1,
             Text = "",
             Parent = Window.TabHolder
         })
 
-        -- Tab background with purple border for selected tab
+        -- Tab background (no border initially)
         local tabBackground = Serenity.Creator.New("Frame", {
             Name = "Background",
             Size = UDim2.new(1, 0, 1, 0),
@@ -321,44 +319,39 @@ return function(Serenity, Config)
             Parent = tabButton
         }, {
             Serenity.Creator.New("UICorner", {
-                CornerRadius = UDim.new(0, 5)
-            }),
-            Serenity.Creator.New("UIStroke", {
-                Color = Color3.fromRGB(65, 65, 65),
-                Thickness = 1,
-                Transparency = 0.8
+                CornerRadius = UDim.new(0, 6)
             })
         })
 
         -- Icon (if provided)
-        local iconPosition = UDim2.new(0, 10, 0.5, 0)
-        local textPosition = UDim2.new(0, iconId and 32 or 10, 0.5, 0)
+        local iconPosition = UDim2.new(0, 12, 0.5, 0)
+        local textPosition = UDim2.new(0, iconId and 34 or 12, 0.5, 0)
         
         if iconId then
             Serenity.Creator.New("ImageLabel", {
                 Name = "Icon",
                 AnchorPoint = Vector2.new(0, 0.5),
-                Size = UDim2.new(0, 16, 0, 16),
+                Size = UDim2.new(0, 18, 0, 18),
                 Position = iconPosition,
                 BackgroundTransparency = 1,
                 Image = "rbxassetid://" .. iconId,
-                ImageColor3 = Color3.fromRGB(200, 200, 200),
+                ImageColor3 = Color3.fromRGB(180, 180, 180),
                 Parent = tabButton
             })
         end
 
-        -- Tab label
+        -- Tab label with bolder font
         local tabLabel = Serenity.Creator.New("TextLabel", {
             Name = "Label",
             AnchorPoint = Vector2.new(0, 0.5),
             Position = textPosition,
-            Size = UDim2.new(1, iconId and -32 or -10, 1, 0),
+            Size = UDim2.new(1, iconId and -34 or -12, 1, 0),
             BackgroundTransparency = 1,
             Text = tabConfig.Title,
-            TextColor3 = Color3.fromRGB(200, 200, 200),
-            TextTransparency = 0.4,
-            TextSize = 13,
-            Font = Enum.Font.GothamSemibold,
+            TextColor3 = Color3.fromRGB(180, 180, 180),
+            TextTransparency = 0.3,
+            TextSize = 12, -- Start smaller
+            Font = Enum.Font.GothamSemibold, -- Bolder
             TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Center,
             Parent = tabButton
@@ -367,9 +360,7 @@ return function(Serenity, Config)
         -- Create tab content
         local tabContent = Serenity.Creator.New("ScrollingFrame", {
             Name = tabConfig.Title .. "Content",
-            Size = UDim2.new(1, -10, 1, -10),
-            Position = UDim2.new(0.5, 0, 0.5, 0),
-            AnchorPoint = Vector2.new(0.5, 0.5),
+            Size = UDim2.new(1, 0, 1, 0),
             BackgroundColor3 = Color3.fromRGB(21, 21, 21),
             BackgroundTransparency = 1,
             ScrollBarThickness = 3,
@@ -432,11 +423,11 @@ return function(Serenity, Config)
 
         function tab:AddSection(sectionConfig)
             local sectionConfig = sectionConfig or {}
-            local isOpen = sectionConfig.Open ~= false -- Default to open
+            local isOpen = sectionConfig.Open ~= false
             
             local sectionFrame = Serenity.Creator.New("Frame", {
                 Name = sectionConfig.Title .. "Section",
-                Size = UDim2.new(1, -10, 0, 40), -- Start with header height
+                Size = UDim2.new(1, -10, 0, isOpen and 100 or 40),
                 BackgroundColor3 = Color3.fromRGB(21, 21, 21),
                 Parent = tabContent
             }, {
@@ -449,21 +440,21 @@ return function(Serenity, Config)
                 })
             })
 
-            -- Section title (darker grey and smaller)
+            -- Section title with bolder font
             local sectionTitle = Serenity.Creator.New("TextLabel", {
                 Name = "Title",
                 Size = UDim2.new(1, -40, 0, 30),
                 Position = UDim2.fromOffset(10, 5),
                 BackgroundTransparency = 1,
                 Text = sectionConfig.Title,
-                TextColor3 = Color3.fromRGB(150, 150, 150), -- Darker grey
-                TextSize = 12, -- Smaller
-                Font = Enum.Font.Gotham,
+                TextColor3 = Color3.fromRGB(150, 150, 150),
+                TextSize = 12,
+                Font = Enum.Font.GothamSemibold, -- Bolder
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = sectionFrame
             })
 
-            -- Expand/collapse button (top right)
+            -- Expand/collapse button
             local expandButton = Serenity.Creator.New("TextButton", {
                 Name = "ExpandButton",
                 Size = UDim2.new(0, 20, 0, 20),
@@ -544,13 +535,13 @@ return function(Serenity, Config)
                     Parent = elementsContainer
                 })
 
-                -- Toggle box (checkbox style) - FIXED ALIGNMENT
+                -- Toggle box - FIXED POSITION (centered vertically)
                 local toggleBox = Serenity.Creator.New("TextButton", {
                     Name = "ToggleBox",
                     Size = UDim2.new(0, 20, 0, 20),
-                    Position = UDim2.new(0, 0, 0.5, -10), -- Properly centered vertically
+                    Position = UDim2.new(0, 0, 0.5, 0), -- FIXED: Changed from -10 to 0
                     AnchorPoint = Vector2.new(0, 0.5),
-                    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                    BackgroundColor3 = Color3.fromRGB(35, 35, 35), -- Dark grey when off
                     AutoButtonColor = false,
                     Text = "",
                     Parent = toggleFrame
@@ -559,30 +550,24 @@ return function(Serenity, Config)
                         CornerRadius = UDim.new(0, 4)
                     }),
                     Serenity.Creator.New("UIStroke", {
-                        Color = Color3.fromRGB(65, 65, 65),
+                        Color = Color3.fromRGB(55, 55, 55),
                         Thickness = 1
-                    }),
-                    Serenity.Creator.New("UIGradient", {
-                        Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, Color3.fromRGB(140, 70, 255)),
-                            ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 40, 200))
-                        })
                     })
                 })
 
-                -- Checkmark (proper checkmark icon)
+                -- Checkmark
                 local checkmark = Serenity.Creator.New("ImageLabel", {
                     Name = "Checkmark",
                     Size = UDim2.new(0, 14, 0, 14),
                     Position = UDim2.new(0.5, -7, 0.5, -7),
                     BackgroundTransparency = 1,
-                    Image = "rbxassetid://10734961420", -- Checkmark icon
+                    Image = "rbxassetid://10734961420",
                     ImageColor3 = Color3.fromRGB(255, 255, 255),
                     Visible = false,
                     Parent = toggleBox
                 })
 
-                -- Toggle label - Properly aligned with checkbox
+                -- Toggle label with bolder font
                 Serenity.Creator.New("TextLabel", {
                     Name = "Label",
                     Size = UDim2.new(1, -25, 1, 0),
@@ -591,9 +576,9 @@ return function(Serenity, Config)
                     Text = toggleConfig.Title,
                     TextColor3 = Color3.fromRGB(255, 255, 255),
                     TextSize = 14,
-                    Font = Enum.Font.Gotham,
+                    Font = Enum.Font.GothamSemibold, -- Bolder
                     TextXAlignment = Enum.TextXAlignment.Left,
-                    TextYAlignment = Enum.TextYAlignment.Center, -- Center aligned with checkbox
+                    TextYAlignment = Enum.TextYAlignment.Center,
                     Parent = toggleFrame
                 })
 
@@ -615,9 +600,9 @@ return function(Serenity, Config)
                             Position = UDim2.new(0.5, -7, 0.5, -7)
                         }):Play()
                     else
-                        -- Animate checkmark out
+                        -- Animate checkmark out - back to dark grey
                         TweenService:Create(toggleBox, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                            BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                            BackgroundColor3 = Color3.fromRGB(35, 35, 35) -- Dark grey
                         }):Play()
                         
                         TweenService:Create(checkmark, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -645,7 +630,7 @@ return function(Serenity, Config)
                 toggleBox.MouseEnter:Connect(function()
                     if not toggleValue then
                         TweenService:Create(toggleBox, TweenInfo.new(0.2), {
-                            BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+                            BackgroundColor3 = Color3.fromRGB(45, 45, 45)
                         }):Play()
                     end
                 end)
@@ -653,7 +638,7 @@ return function(Serenity, Config)
                 toggleBox.MouseLeave:Connect(function()
                     if not toggleValue then
                         TweenService:Create(toggleBox, TweenInfo.new(0.2), {
-                            BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                            BackgroundColor3 = Color3.fromRGB(35, 35, 35)
                         }):Play()
                     end
                 end)
@@ -681,7 +666,7 @@ return function(Serenity, Config)
                     Text = buttonConfig.Title,
                     TextColor3 = Color3.fromRGB(255, 255, 255),
                     TextSize = 14,
-                    Font = Enum.Font.Gotham,
+                    Font = Enum.Font.GothamSemibold, -- Bolder
                     Parent = elementsContainer
                 }, {
                     Serenity.Creator.New("UICorner", {
@@ -716,41 +701,31 @@ return function(Serenity, Config)
             return section
         end
 
-        -- Tab selection function with border highlighting
+        -- Tab selection function with text size animation
         local function selectTab()
-            -- Hide all tabs and remove borders
+            -- Hide all tabs and reset text size
             for _, otherTab in pairs(Window.Tabs) do
                 otherTab.Content.Visible = false
-                TweenService:Create(otherTab.Background, TweenInfo.new(0.3), {
+                TweenService:Create(otherTab.Background, TweenInfo.new(0.4), {
                     BackgroundTransparency = 0.9
                 }):Play()
-                TweenService:Create(otherTab.Label, TweenInfo.new(0.3), {
-                    TextTransparency = 0.4,
-                    TextColor3 = Color3.fromRGB(200, 200, 200)
+                TweenService:Create(otherTab.Label, TweenInfo.new(0.4), {
+                    TextTransparency = 0.3,
+                    TextColor3 = Color3.fromRGB(180, 180, 180),
+                    TextSize = 12 -- Smaller text for inactive tabs
                 }):Play()
-                if otherTab.Background:FindFirstChild("UIStroke") then
-                    TweenService:Create(otherTab.Background.UIStroke, TweenInfo.new(0.3), {
-                        Color = Color3.fromRGB(65, 65, 65),
-                        Transparency = 0.8
-                    }):Play()
-                end
             end
             
-            -- Show selected tab with purple border
+            -- Show selected tab with larger text
             tabContent.Visible = true
-            TweenService:Create(tab.Background, TweenInfo.new(0.3), {
+            TweenService:Create(tab.Background, TweenInfo.new(0.4), {
                 BackgroundTransparency = 0.8
             }):Play()
-            TweenService:Create(tab.Label, TweenInfo.new(0.3), {
+            TweenService:Create(tab.Label, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                 TextTransparency = 0,
-                TextColor3 = Color3.fromRGB(255, 255, 255)
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                TextSize = 14 -- Larger text for active tab
             }):Play()
-            if tab.Background:FindFirstChild("UIStroke") then
-                TweenService:Create(tab.Background.UIStroke, TweenInfo.new(0.3), {
-                    Color = Color3.fromRGB(140, 70, 255),
-                    Transparency = 0.3
-                }):Play()
-            end
             
             Window.SelectedTab = tab.Index
         end
@@ -758,6 +733,7 @@ return function(Serenity, Config)
         -- Tab switching
         tabButton.MouseButton1Click:Connect(selectTab)
 
+        -- Store tabs in order
         table.insert(Window.Tabs, tab)
         
         -- Select first tab
