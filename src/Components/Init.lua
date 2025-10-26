@@ -1,8 +1,8 @@
+-- Components module for Serenity UI
+local Components = {}
 
--- Components module index
-return {
-    Window = require(script.Window),
-    TitleBar = require(script.TitleBar),
-    Tab = require(script.Tab),
-    Section = require(script.Section)
-}
+Components.Tab = require(script.Tab)
+Components.Button = require(script.Button)
+Components.Section = require(script.Section)
+
+return Components
