@@ -24,6 +24,33 @@ return function(Serenity, Config)
 
     local Dragging, DragInput, MousePos, StartPos = false
 
+    -- Load custom icons
+    local CustomIcons = nil
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/icons.lua"))()
+    end)
+    
+    if success then
+        CustomIcons = result
+        print("✅ Custom icons loaded successfully")
+    else
+        print("⚠️ Custom icons failed to load, using fallback")
+        CustomIcons = {
+            house = "10734961420",
+            user = "10734961420", 
+            sword = "10734961420",
+            settings = "10734961420"
+        }
+    end
+
+    -- Function to get icon
+    local function getIcon(iconName)
+        if not iconName or iconName == "" then
+            return nil
+        end
+        return CustomIcons[iconName] or "10734961420"
+    end
+
     -- Create main window
     Window.ScreenGui = Serenity.Creator.New("ScreenGui", {
         Name = "SerenityUI",
@@ -142,8 +169,8 @@ return function(Serenity, Config)
     -- Tab navigation area (no border)
     Window.TabContainer = Serenity.Creator.New("Frame", {
         Name = "TabContainer",
-        Size = UDim2.new(0, Window.TabWidth, 1, -28), -- Extend to bottom
-        Position = UDim2.fromOffset(0, 28), -- Start below titlebar
+        Size = UDim2.new(0, 140, 1, -28), -- Smaller width for moved divider
+        Position = UDim2.fromOffset(0, 28),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
         Parent = Window.Root
@@ -162,15 +189,15 @@ return function(Serenity, Config)
         Parent = Window.TabContainer
     }, {
         Serenity.Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 2) -- Reduced padding for tab dividers
+            Padding = UDim.new(0, 0) -- No padding for manual divider control
         })
     })
 
-    -- Vertical divider between tabs and content
+    -- Vertical divider between tabs and content (moved left)
     Window.Divider = Serenity.Creator.New("Frame", {
         Name = "Divider",
-        Size = UDim2.new(0, 1, 1, -28), -- Full height minus titlebar
-        Position = UDim2.new(0, Window.TabWidth, 0, 28),
+        Size = UDim2.new(0, 1, 1, -28),
+        Position = UDim2.new(0, 140, 0, 28), -- Moved to 140 instead of 160
         BackgroundColor3 = Color3.fromRGB(55, 55, 55),
         BorderSizePixel = 0,
         Parent = Window.Root
@@ -179,8 +206,8 @@ return function(Serenity, Config)
     -- Content area (no border)
     Window.ContentContainer = Serenity.Creator.New("Frame", {
         Name = "ContentContainer",
-        Size = UDim2.new(1, -Window.TabWidth - 10, 1, -38), -- Account for divider
-        Position = UDim2.new(0, Window.TabWidth + 5, 0, 38), -- Start after divider
+        Size = UDim2.new(1, -150, 1, -38), -- Adjusted for new divider position
+        Position = UDim2.new(0, 145, 0, 38), -- Adjusted for new divider position
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
         Parent = Window.Root
@@ -256,11 +283,15 @@ return function(Serenity, Config)
         
         -- Add to tab order
         table.insert(Window.TabOrder, tabConfig)
+        local tabIndex = #Window.TabOrder
+        
+        -- Get icon
+        local iconId = getIcon(tabConfig.Icon)
         
         -- Create tab button
         local tabButton = Serenity.Creator.New("TextButton", {
             Name = tabConfig.Title .. "Tab",
-            Size = UDim2.new(1, 0, 0, 40), -- Taller for bigger text
+            Size = UDim2.new(1, 0, 0, 40),
             BackgroundTransparency = 1,
             Text = "",
             Parent = Window.TabHolder
@@ -279,20 +310,60 @@ return function(Serenity, Config)
             })
         })
 
-        -- Tab label with bigger, bolder text
+        -- Icon (if available)
+        local textPosition = UDim2.new(0, 10, 0.5, 0)
+        if iconId then
+            textPosition = UDim2.new(0, 35, 0.5, 0)
+            Serenity.Creator.New("ImageLabel", {
+                Name = "Icon",
+                AnchorPoint = Vector2.new(0, 0.5),
+                Size = UDim2.new(0, 16, 0, 16),
+                Position = UDim2.new(0, 10, 0.5, 0),
+                BackgroundTransparency = 1,
+                Image = "rbxassetid://" .. iconId,
+                ImageColor3 = Color3.fromRGB(200, 200, 200),
+                Parent = tabButton
+            })
+        end
+
+        -- Tab label with underline container
+        local labelContainer = Serenity.Creator.New("Frame", {
+            Name = "LabelContainer",
+            Size = UDim2.new(1, iconId and -35 or -10, 0, 20),
+            Position = textPosition,
+            AnchorPoint = Vector2.new(0, 0.5),
+            BackgroundTransparency = 1,
+            Parent = tabButton
+        })
+
+        -- Tab label
         local tabLabel = Serenity.Creator.New("TextLabel", {
             Name = "Label",
-            Size = UDim2.new(1, -20, 1, 0),
-            Position = UDim2.new(0, 10, 0, 0),
+            Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
             Text = tabConfig.Title,
             TextColor3 = Color3.fromRGB(200, 200, 200),
             TextTransparency = 0.4,
-            TextSize = 14, -- Bigger text
-            Font = Enum.Font.GothamBold, -- Bolder font
+            TextSize = 14,
+            Font = Enum.Font.GothamBold,
             TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Center,
-            Parent = tabButton
+            Parent = labelContainer
+        })
+
+        -- Underline (initially hidden)
+        local underline = Serenity.Creator.New("Frame", {
+            Name = "Underline",
+            Size = UDim2.new(1, 0, 0, 2),
+            Position = UDim2.new(0, 0, 1, 0),
+            BackgroundColor3 = Color3.fromRGB(140, 70, 255),
+            BackgroundTransparency = 1, -- Start hidden
+            BorderSizePixel = 0,
+            Parent = labelContainer
+        }, {
+            Serenity.Creator.New("UICorner", {
+                CornerRadius = UDim.new(1, 0)
+            })
         })
 
         -- Create tab content
@@ -307,7 +378,7 @@ return function(Serenity, Config)
             ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255),
             ScrollBarImageTransparency = 0.95,
             CanvasSize = UDim2.new(0, 0, 0, 0),
-            Visible = (#Window.Tabs == 0),
+            Visible = (tabIndex == 1), -- Only first tab visible initially
             Parent = Window.ContentContainer
         }, {
             Serenity.Creator.New("UIListLayout", {
@@ -325,10 +396,11 @@ return function(Serenity, Config)
             Button = tabButton,
             Background = tabBackground,
             Label = tabLabel,
+            Underline = underline,
             Content = tabContent,
             Sections = {},
             Name = tabConfig.Title,
-            Index = #Window.Tabs + 1
+            Index = tabIndex
         }
 
         -- Update content size function
@@ -343,7 +415,7 @@ return function(Serenity, Config)
         contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateContentSize)
         updateContentSize()
 
-        -- Add divider element to tab
+        -- Add divider element to tab content
         function tab:AddDivider()
             local divider = Serenity.Creator.New("Frame", {
                 Name = "Divider",
@@ -361,8 +433,8 @@ return function(Serenity, Config)
             return divider
         end
 
-        -- Add tab divider (between tabs)
-        if #Window.Tabs > 0 then
+        -- Add tab divider (between tabs in sidebar)
+        function tab:AddTabDivider()
             local tabDivider = Serenity.Creator.New("Frame", {
                 Name = "TabDivider",
                 Size = UDim2.new(1, -10, 0, 1),
@@ -376,6 +448,8 @@ return function(Serenity, Config)
                     CornerRadius = UDim.new(1, 0)
                 })
             })
+            
+            return tabDivider
         end
 
         function tab:AddSection(sectionConfig)
@@ -406,7 +480,7 @@ return function(Serenity, Config)
                 Text = sectionConfig.Title,
                 TextColor3 = Color3.fromRGB(150, 150, 150),
                 TextSize = 12,
-                Font = Enum.Font.GothamSemibold, -- Bolder
+                Font = Enum.Font.GothamSemibold,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = sectionFrame
             })
@@ -456,13 +530,13 @@ return function(Serenity, Config)
                     Parent = elementsContainer
                 })
 
-                -- Toggle box (FIXED POSITION - properly centered)
+                -- Toggle box (properly centered)
                 local toggleBox = Serenity.Creator.New("TextButton", {
                     Name = "ToggleBox",
                     Size = UDim2.new(0, 20, 0, 20),
-                    Position = UDim2.new(0, 0, 0.5, 0), -- FIXED: Changed from -10 to 0
+                    Position = UDim2.new(0, 0, 0.5, 0),
                     AnchorPoint = Vector2.new(0, 0.5),
-                    BackgroundColor3 = Color3.fromRGB(45, 45, 45), -- Dark grey when off
+                    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
                     AutoButtonColor = false,
                     Text = "",
                     Parent = toggleFrame
@@ -497,7 +571,7 @@ return function(Serenity, Config)
                     Text = toggleConfig.Title,
                     TextColor3 = Color3.fromRGB(255, 255, 255),
                     TextSize = 14,
-                    Font = Enum.Font.GothamSemibold, -- Bolder
+                    Font = Enum.Font.GothamSemibold,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextYAlignment = Enum.TextYAlignment.Center,
                     Parent = toggleFrame
@@ -507,35 +581,11 @@ return function(Serenity, Config)
 
                 local function updateToggle()
                     if toggleValue then
-                        -- Animate checkmark in
-                        checkmark.Size = UDim2.new(0, 0, 0, 0)
-                        checkmark.Position = UDim2.new(0.5, 0, 0.5, 0)
                         checkmark.Visible = true
-                        
-                        TweenService:Create(toggleBox, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                            BackgroundColor3 = Color3.fromRGB(120, 60, 220)
-                        }):Play()
-                        
-                        TweenService:Create(checkmark, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                            Size = UDim2.new(0, 14, 0, 14),
-                            Position = UDim2.new(0.5, -7, 0.5, -7)
-                        }):Play()
+                        toggleBox.BackgroundColor3 = Color3.fromRGB(120, 60, 220)
                     else
-                        -- Animate checkmark out (back to dark grey)
-                        TweenService:Create(toggleBox, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                            BackgroundColor3 = Color3.fromRGB(45, 45, 45) -- Dark grey
-                        }):Play()
-                        
-                        TweenService:Create(checkmark, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                            Size = UDim2.new(0, 0, 0, 0),
-                            Position = UDim2.new(0.5, 0, 0.5, 0)
-                        }):Play()
-                        
-                        delay(0.2, function()
-                            if not toggleValue then
-                                checkmark.Visible = false
-                            end
-                        end)
+                        checkmark.Visible = false
+                        toggleBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
                     end
                 end
 
@@ -550,17 +600,13 @@ return function(Serenity, Config)
                 -- Hover effects
                 toggleBox.MouseEnter:Connect(function()
                     if not toggleValue then
-                        TweenService:Create(toggleBox, TweenInfo.new(0.2), {
-                            BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-                        }):Play()
+                        toggleBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
                     end
                 end)
 
                 toggleBox.MouseLeave:Connect(function()
                     if not toggleValue then
-                        TweenService:Create(toggleBox, TweenInfo.new(0.2), {
-                            BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-                        }):Play()
+                        toggleBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
                     end
                 end)
 
@@ -587,7 +633,7 @@ return function(Serenity, Config)
                     Text = buttonConfig.Title,
                     TextColor3 = Color3.fromRGB(255, 255, 255),
                     TextSize = 14,
-                    Font = Enum.Font.GothamSemibold, -- Bolder
+                    Font = Enum.Font.GothamSemibold,
                     Parent = elementsContainer
                 }, {
                     Serenity.Creator.New("UICorner", {
@@ -597,15 +643,11 @@ return function(Serenity, Config)
 
                 -- Hover effects
                 button.MouseEnter:Connect(function()
-                    TweenService:Create(button, TweenInfo.new(0.2), {
-                        BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                    }):Play()
+                    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
                 end)
 
                 button.MouseLeave:Connect(function()
-                    TweenService:Create(button, TweenInfo.new(0.2), {
-                        BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-                    }):Play()
+                    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
                 end)
 
                 button.MouseButton1Click:Connect(function()
@@ -622,27 +664,21 @@ return function(Serenity, Config)
             return section
         end
 
-        -- Tab selection function with text size change
+        -- Tab selection function with underline
         local function selectTab()
-            -- Hide all tabs and reset text
+            -- Hide all tabs and reset underline
             for _, otherTab in pairs(Window.Tabs) do
                 otherTab.Content.Visible = false
-                TweenService:Create(otherTab.Label, TweenInfo.new(0.3), {
-                    TextTransparency = 0.4,
-                    TextColor3 = Color3.fromRGB(200, 200, 200),
-                    TextSize = 14 -- Normal size
-                }):Play()
+                otherTab.Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+                otherTab.Underline.BackgroundTransparency = 1
             end
             
-            -- Show selected tab with bigger text
+            -- Show selected tab with underline
             tabContent.Visible = true
-            TweenService:Create(tab.Label, TweenInfo.new(0.3), {
-                TextTransparency = 0,
-                TextColor3 = Color3.fromRGB(255, 255, 255),
-                TextSize = 16 -- Bigger size for selected tab
-            }):Play()
+            tab.Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tab.Underline.BackgroundTransparency = 0
             
-            Window.SelectedTab = tab.Index
+            Window.SelectedTab = tabIndex
         end
 
         -- Tab switching
@@ -651,7 +687,7 @@ return function(Serenity, Config)
         table.insert(Window.Tabs, tab)
         
         -- Select first tab
-        if #Window.Tabs == 1 then
+        if tabIndex == 1 then
             selectTab()
         end
 
