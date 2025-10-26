@@ -33,8 +33,66 @@ return function(Serenity, Config)
     if success and type(result) == "table" then
         CustomIcons = result
         print("✅ Custom icons loaded successfully")
+        -- Debug: Print available icons
+        print("🔍 Available icons:")
+        for iconName, iconId in pairs(CustomIcons) do
+            print("   " .. iconName .. " -> " .. iconId)
+        end
     else
-        print("⚠️ Custom icons failed to load")
+        print("⚠️ Custom icons failed to load: " .. tostring(result))
+        -- Fallback to default icons
+        CustomIcons = {
+            house = "116543637337872",
+            target = "114783304987099", 
+            backpack = "10734961420",
+            ["map-pin"] = "76847249215450",
+            calendar = "106435270493821",
+            settings = "114783304987099",
+            link = "116543637337872",
+            user = "10734961420"
+        }
+        print("🔄 Using fallback icons")
+    end
+
+    -- Function to get icon (IMPROVED)
+    local function getIcon(iconName)
+        if not iconName or iconName == "" then
+            return nil
+        end
+        
+        local iconId = CustomIcons[iconName]
+        
+        -- If icon not found, try common alternatives
+        if not iconId then
+            local fallbacks = {
+                house = "house",
+                home = "house",
+                updates = "house",
+                farm = "target",
+                autofarm = "target",
+                items = "backpack",
+                inventory = "backpack",
+                teleport = "map-pin",
+                locations = "map-pin",
+                events = "calendar",
+                misc = "settings",
+                webhook = "link",
+                settings = "settings",
+                user = "user"
+            }
+            
+            if fallbacks[iconName:lower()] then
+                iconId = CustomIcons[fallbacks[iconName:lower()]]
+            end
+        end
+        
+        if iconId then
+            print("🎯 Using icon: " .. iconName .. " -> " .. iconId)
+        else
+            print("❌ Icon not found: " .. iconName)
+        end
+        
+        return iconId
     end
 
     -- Function to get icon
