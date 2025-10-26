@@ -267,7 +267,7 @@ return function(Serenity, Config)
         Parent = Window.InfoContainer
     })
 
-    -- Guest text on the right (underlined)
+    -- Guest text on the right (without underline since TextDecorations isn't supported)
     Serenity.Creator.New("TextLabel", {
         Name = "GuestText",
         Size = UDim2.new(0.3, 0, 1, 0),
@@ -278,7 +278,6 @@ return function(Serenity, Config)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         TextXAlignment = Enum.TextXAlignment.Right,
-        TextDecorations = Enum.TextDecorations.Underline,
         Parent = Window.InfoContainer
     })
 
