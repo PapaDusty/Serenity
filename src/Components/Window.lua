@@ -544,7 +544,7 @@ return function(Serenity, Config)
                 BackgroundTransparency = 1,
                 Text = sectionConfig.Title,
                 TextColor3 = Color3.fromRGB(150, 150, 150),
-                TextSize = 12,
+                TextSize = 14,
                 Font = Enum.Font.GothamSemibold,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextYAlignment = Enum.TextYAlignment.Center,
