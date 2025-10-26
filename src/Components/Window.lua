@@ -87,20 +87,20 @@ return function(Serenity, Config)
         Parent = TitleBar
     })
 
-    -- Title with icon (centered)
+    -- Title with icon
     local TitleContainer = Serenity.Creator.New("Frame", {
         Name = "TitleContainer",
-        Size = UDim2.new(0.6, 0, 1, 0),
+        Size = UDim2.new(0.4, 0, 1, 0),
         Position = UDim2.new(0.5, 0, 0, 0),
         AnchorPoint = Vector2.new(0.5, 0),
         BackgroundTransparency = 1,
         Parent = TitleBar
     })
 
-    -- Title icon (bigger)
+    -- Title icon
     Serenity.Creator.New("ImageLabel", {
         Name = "TitleIcon",
-        Size = UDim2.new(0, 20, 0, 20),
+        Size = UDim2.new(0, 16, 0, 16),
         Position = UDim2.new(0, 10, 0.5, 0),
         AnchorPoint = Vector2.new(0, 0.5),
         BackgroundTransparency = 1,
@@ -108,11 +108,11 @@ return function(Serenity, Config)
         Parent = TitleContainer
     })
 
-    -- Title text (centered with icon)
+    -- Title text
     Serenity.Creator.New("TextLabel", {
         Name = "Title",
-        Size = UDim2.new(1, -35, 1, 0),
-        Position = UDim2.new(0, 35, 0, 0),
+        Size = UDim2.new(1, -30, 1, 0),
+        Position = UDim2.new(0, 30, 0, 0),
         BackgroundTransparency = 1,
         Text = Config.Title or "Serenity UI",
         TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -122,10 +122,10 @@ return function(Serenity, Config)
         Parent = TitleContainer
     })
 
-    -- Subtitle (on the left)
+    -- Subtitle (on the left, bigger text)
     Serenity.Creator.New("TextLabel", {
         Name = "SubTitle",
-        Size = UDim2.new(0.3, 0, 1, 0),
+        Size = UDim2.new(0.4, 0, 1, 0),
         Position = UDim2.new(0, 10, 0, 0),
         BackgroundTransparency = 1,
         Text = Config.SubTitle or "v" .. Serenity.Version,
@@ -214,11 +214,11 @@ return function(Serenity, Config)
         Parent = CloseButton
     })
 
-    -- Info Container (taller and properly rounded)
+    -- Info Container (at the bottom)
     Window.InfoContainer = Serenity.Creator.New("Frame", {
         Name = "InfoContainer",
-        Size = UDim2.new(1, 0, 0, 36),
-        Position = UDim2.new(0, 0, 1, -36),
+        Size = UDim2.new(1, 0, 0, 28),
+        Position = UDim2.new(0, 0, 1, -28),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BorderSizePixel = 0,
         Parent = Window.Root
@@ -237,10 +237,10 @@ return function(Serenity, Config)
         Parent = Window.InfoContainer
     })
 
-    -- Player avatar (bigger)
+    -- Player avatar
     local Avatar = Serenity.Creator.New("ImageLabel", {
         Name = "Avatar",
-        Size = UDim2.new(0, 28, 0, 28),
+        Size = UDim2.new(0, 20, 0, 20),
         Position = UDim2.new(0, 8, 0.5, 0),
         AnchorPoint = Vector2.new(0, 0.5),
         BackgroundColor3 = Color3.fromRGB(45, 45, 45),
@@ -253,39 +253,24 @@ return function(Serenity, Config)
         })
     })
 
-    -- Player display name (bigger text)
+    -- Player display name
     Serenity.Creator.New("TextLabel", {
         Name = "PlayerName",
-        Size = UDim2.new(0.5, -40, 1, 0),
-        Position = UDim2.new(0, 45, 0, 0),
+        Size = UDim2.new(1, -35, 1, 0),
+        Position = UDim2.new(0, 35, 0, 0),
         BackgroundTransparency = 1,
         Text = player.DisplayName,
         TextColor3 = Color3.fromRGB(200, 200, 200),
-        TextSize = 14,
+        TextSize = 12,
         Font = Enum.Font.GothamSemibold,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = Window.InfoContainer
-    })
-
-    -- Guest text on the right (underlined)
-    Serenity.Creator.New("TextLabel", {
-        Name = "GuestText",
-        Size = UDim2.new(0.3, 0, 1, 0),
-        Position = UDim2.new(0.7, 0, 0, 0),
-        BackgroundTransparency = 1,
-        Text = "Guest",
-        TextColor3 = Color3.fromRGB(150, 150, 150),
-        TextSize = 12,
-        Font = Enum.Font.Gotham,
-        TextXAlignment = Enum.TextXAlignment.Right,
-        TextDecorations = Enum.TextDecorations.Underline,
         Parent = Window.InfoContainer
     })
 
     -- Tab navigation area
     Window.TabContainer = Serenity.Creator.New("Frame", {
         Name = "TabContainer",
-        Size = UDim2.new(0, Window.TabWidth, 1, -64),
+        Size = UDim2.new(0, Window.TabWidth, 1, -56),
         Position = UDim2.fromOffset(0, 28),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
@@ -313,7 +298,7 @@ return function(Serenity, Config)
     -- Vertical divider between tabs and content
     Window.Divider = Serenity.Creator.New("Frame", {
         Name = "Divider",
-        Size = UDim2.new(0, 1, 1, -64),
+        Size = UDim2.new(0, 1, 1, -56),
         Position = UDim2.new(0, Window.TabWidth, 0, 28),
         BackgroundColor3 = Color3.fromRGB(55, 55, 55),
         BorderSizePixel = 0,
@@ -323,7 +308,7 @@ return function(Serenity, Config)
     -- Content area
     Window.ContentContainer = Serenity.Creator.New("Frame", {
         Name = "ContentContainer",
-        Size = UDim2.new(1, -Window.TabWidth - 10, 1, -74),
+        Size = UDim2.new(1, -Window.TabWidth - 10, 1, -66),
         Position = UDim2.new(0, Window.TabWidth + 5, 0, 38),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
@@ -491,13 +476,13 @@ return function(Serenity, Config)
             Parent = labelContainer
         })
 
-        -- Underline (removed animation, just static)
+        -- Underline
         local underline = Serenity.Creator.New("Frame", {
             Name = "Underline",
             Size = UDim2.new(0, 0, 0, 2),
             Position = UDim2.new(0.5, 0, 1, 0),
             AnchorPoint = Vector2.new(0.5, 0),
-            BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+            BackgroundColor3 = Color3.fromRGB(140, 70, 255),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
             Parent = labelContainer
@@ -837,7 +822,7 @@ return function(Serenity, Config)
             return section
         end
 
-        -- Tab selection function (removed purple underline animation)
+        -- Tab selection function
         local function selectTab()
             for i = 1, #Window.OrderedTabs do
                 local otherTab = Window.OrderedTabs[i]
@@ -846,7 +831,11 @@ return function(Serenity, Config)
                     otherTab.Label.TextColor3 = Color3.fromRGB(200, 200, 200)
                     otherTab.Label.TextSize = 14
                     otherTab.IsSelected = false
-                    otherTab.Underline.BackgroundTransparency = 1
+                    
+                    TweenService:Create(otherTab.Underline, TweenInfo.new(0.2), {
+                        BackgroundTransparency = 1,
+                        Size = UDim2.new(0, 0, 0, 2)
+                    }):Play()
                 end
             end
             
@@ -854,7 +843,14 @@ return function(Serenity, Config)
             tab.Label.TextColor3 = Color3.fromRGB(255, 255, 255)
             tab.Label.TextSize = 16
             tab.IsSelected = true
+            
             tab.Underline.BackgroundTransparency = 0
+            tab.Underline.Size = UDim2.new(0, 0, 0, 2)
+            tab.Underline.Position = UDim2.new(0.5, 0, 1, 0)
+            
+            TweenService:Create(tab.Underline, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(1, 0, 0, 2)
+            }):Play()
             
             Window.SelectedTab = tabIndex
         end
