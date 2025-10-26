@@ -839,88 +839,17 @@ return function(Serenity, Config)
             end
 
             function section:AddDropdown(dropdownConfig)
-                local dropdownFrame = Serenity.Creator.New("Frame", {
-                    Name = dropdownConfig.Title .. "Dropdown",
-                    Size = UDim2.new(1, 0, 0, 60),
-                    BackgroundTransparency = 1,
-                    Parent = elementsContainer
-                })
-
-                -- Dropdown label
-                Serenity.Creator.New("TextLabel", {
-                    Name = "DropdownLabel",
-                    Size = UDim2.new(1, 0, 0, 20),
-                    BackgroundTransparency = 1,
-                    Text = dropdownConfig.Title,
-                    TextColor3 = Color3.fromRGB(255, 255, 255),
-                    TextSize = 14,
-                    Font = Enum.Font.GothamSemibold,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    Parent = dropdownFrame
-                })
-
-                -- Dropdown button
-                local dropdownButton = Serenity.Creator.New("TextButton", {
-                    Name = "DropdownButton",
-                    Size = UDim2.new(1, 0, 0, 30),
-                    Position = UDim2.new(0, 0, 0, 25),
-                    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-                    Text = dropdownConfig.Default or "Select...",
-                    TextColor3 = Color3.fromRGB(200, 200, 200),
-                    TextSize = 12,
-                    Font = Enum.Font.Gotham,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    Parent = dropdownFrame
-                }, {
-                    Serenity.Creator.New("UICorner", {
-                        CornerRadius = UDim.new(0, 6)
-                    }),
-                    Serenity.Creator.New("UIPadding", {
-                        PaddingLeft = UDim.new(0, 10)
-                    }),
-                    Serenity.Creator.New("UIStroke", {
-                        Color = Color3.fromRGB(65, 65, 65),
-                        Thickness = 1
-                    })
-                })
-
-                -- Dropdown arrow
-                Serenity.Creator.New("ImageLabel", {
-                    Name = "DropdownArrow",
-                    Size = UDim2.new(0, 16, 0, 16),
-                    Position = UDim2.new(1, -25, 0.5, 0),
-                    AnchorPoint = Vector2.new(1, 0.5),
-                    BackgroundTransparency = 1,
-                    Image = "rbxassetid://10709790948",
-                    ImageColor3 = Color3.fromRGB(200, 200, 200),
-                    Parent = dropdownButton
-                })
-
-                local dropdown = {
-                    Value = dropdownConfig.Default,
+                -- Use the proper Dropdown component instead of the simplified version
+                local DropdownComponent = require(script.Parent.Parent.Components.Dropdown)
+    
+                local dropdown = DropdownComponent({
+                    Title = dropdownConfig.Title,
                     Values = dropdownConfig.Values or {},
-                    Opened = false
-                }
-
-                local function toggleDropdown()
-                    -- Dropdown implementation would go here
-                    print("Dropdown toggled for:", dropdownConfig.Title)
-                end
-
-                dropdownButton.MouseButton1Click:Connect(toggleDropdown)
-
-                function dropdown:SetValue(value)
-                    dropdown.Value = value
-                    dropdownButton.Text = value
-                    if dropdownConfig.Callback then
-                        dropdownConfig.Callback(value)
-                    end
-                end
-
-                function dropdown:GetValue()
-                    return dropdown.Value
-                end
-
+                    Default = dropdownConfig.Default,
+                    Multi = dropdownConfig.Multi or false,
+                    Callback = dropdownConfig.Callback
+                }, elementsContainer)
+    
                 return dropdown
             end
 
