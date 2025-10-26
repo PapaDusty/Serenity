@@ -120,8 +120,8 @@ return function(Serenity, Config)
     -- Control buttons (swapped positions)
     local ButtonContainer = Serenity.Creator.New("Frame", {
         Name = "Controls",
-        Size = UDim2.new(0, 55, 0.85, 0),
-        Position = UDim2.new(1, -55, 0, 3),
+        Size = UDim2.new(0, 60, 1, 0),
+        Position = UDim2.new(1, -65, 0, 2),
         BackgroundTransparency = 1,
         Parent = TitleBar
     }, {
@@ -329,7 +329,7 @@ return function(Serenity, Config)
     local layout = Window.TabHolder:WaitForChild("UIListLayout")
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
 
-    -- Store tabs in proper order - FIXED: Use array to maintain order
+    -- FIXED: Store tabs in proper order using an array
     Window.OrderedTabs = {}
     Window.TabCount = 0
 
@@ -401,9 +401,6 @@ return function(Serenity, Config)
             TextYAlignment = Enum.TextYAlignment.Center,
             Parent = labelContainer
         })
-
-        -- Get text bounds for underline
-        local textBounds = tabLabel.TextBounds
 
         -- Underline (initially hidden with 0 width)
         local underline = Serenity.Creator.New("Frame", {
@@ -530,7 +527,7 @@ return function(Serenity, Config)
             -- Section title (clickable area)
             local sectionTitle = Serenity.Creator.New("TextButton", {
                 Name = "Title",
-                Size = UDim2.new(1, -10, 0, 30),
+                Size = UDim2.new(1, -40, 0, 30),
                 Position = UDim2.fromOffset(10, 5),
                 BackgroundTransparency = 1,
                 Text = "",
@@ -544,7 +541,7 @@ return function(Serenity, Config)
                 BackgroundTransparency = 1,
                 Text = sectionConfig.Title,
                 TextColor3 = Color3.fromRGB(150, 150, 150),
-                TextSize = 14,
+                TextSize = 12,
                 Font = Enum.Font.GothamSemibold,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextYAlignment = Enum.TextYAlignment.Center,
@@ -759,17 +756,20 @@ return function(Serenity, Config)
         -- Tab selection function with slower animation and bigger text
         local function selectTab()
             -- Hide all tabs and reset appearance
-            for i, otherTab in ipairs(Window.OrderedTabs) do
-                otherTab.Content.Visible = false
-                otherTab.Label.TextColor3 = Color3.fromRGB(200, 200, 200)
-                otherTab.Label.TextSize = 14 -- Reset to normal size
-                otherTab.IsSelected = false
-                
-                -- Hide underline
-                TweenService:Create(otherTab.Underline, TweenInfo.new(0.2), {
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(0, 0, 0, 2)
-                }):Play()
+            for i = 1, #Window.OrderedTabs do
+                local otherTab = Window.OrderedTabs[i]
+                if otherTab then
+                    otherTab.Content.Visible = false
+                    otherTab.Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+                    otherTab.Label.TextSize = 14 -- Reset to normal size
+                    otherTab.IsSelected = false
+                    
+                    -- Hide underline
+                    TweenService:Create(otherTab.Underline, TweenInfo.new(0.2), {
+                        BackgroundTransparency = 1,
+                        Size = UDim2.new(0, 0, 0, 2)
+                    }):Play()
+                end
             end
             
             -- Show selected tab
@@ -783,7 +783,7 @@ return function(Serenity, Config)
             tab.Underline.Size = UDim2.new(0, 0, 0, 2)
             tab.Underline.Position = UDim2.new(0.5, 0, 1, 0)
             
-            TweenService:Create(tab.Underline, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { -- Slower: 0.5 seconds
+            TweenService:Create(tab.Underline, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                 Size = UDim2.new(1, 0, 0, 2)
             }):Play()
             
@@ -793,8 +793,8 @@ return function(Serenity, Config)
         -- Tab switching
         tabButton.MouseButton1Click:Connect(selectTab)
 
-        -- Store tab in ordered array - FIXED: Use array indexing
-        Window.OrderedTabs[tabIndex] = tab
+        -- FIXED: Store tab in ordered array using table.insert
+        table.insert(Window.OrderedTabs, tab)
         Window.Tabs[tabConfig.Title] = tab
         
         -- Select first tab
