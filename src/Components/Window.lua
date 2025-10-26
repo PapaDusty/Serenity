@@ -120,8 +120,8 @@ return function(Serenity, Config)
     -- Control buttons (swapped positions)
     local ButtonContainer = Serenity.Creator.New("Frame", {
         Name = "Controls",
-        Size = UDim2.new(0, 60, 1, 0),
-        Position = UDim2.new(1, -55, 0, 2),
+        Size = UDim2.new(0, 55, 0.85, 0),
+        Position = UDim2.new(1, -55, 0, 3),
         BackgroundTransparency = 1,
         Parent = TitleBar
     }, {
