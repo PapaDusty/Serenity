@@ -111,7 +111,7 @@ return function(Serenity, Config)
         BackgroundTransparency = 1,
         Text = Config.SubTitle or "v" .. Serenity.Version,
         TextColor3 = Color3.fromRGB(150, 150, 150),
-        TextSize = 13, -- Bigger text
+        TextSize = 13,
         Font = Enum.Font.GothamSemibold,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = TitleBar
@@ -120,14 +120,14 @@ return function(Serenity, Config)
     -- Control buttons (swapped positions)
     local ButtonContainer = Serenity.Creator.New("Frame", {
         Name = "Controls",
-        Size = UDim2.new(0, 60, 1, 0), -- Wider for more spacing
+        Size = UDim2.new(0, 60, 1, 0),
         Position = UDim2.new(1, -65, 0, 2),
         BackgroundTransparency = 1,
         Parent = TitleBar
     }, {
         Serenity.Creator.New("UIListLayout", {
             FillDirection = Enum.FillDirection.Horizontal,
-            Padding = UDim.new(0, 8) -- More spacing between buttons
+            Padding = UDim.new(0, 8)
         })
     })
 
@@ -145,7 +145,7 @@ return function(Serenity, Config)
         Name = "Background",
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-        BackgroundTransparency = 1, -- Start hidden
+        BackgroundTransparency = 1,
         Parent = MinButton
     }, {
         Serenity.Creator.New("UICorner", {
@@ -158,7 +158,7 @@ return function(Serenity, Config)
         Size = UDim2.new(0, 16, 0, 16),
         Position = UDim2.new(0.5, -8, 0.5, -8),
         BackgroundTransparency = 1,
-        Image = "rbxassetid://116543637337872", -- New minimize icon
+        Image = "rbxassetid://116543637337872",
         ImageColor3 = Color3.fromRGB(255, 255, 255),
         Parent = MinButton
     })
@@ -177,7 +177,7 @@ return function(Serenity, Config)
         Name = "Background",
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-        BackgroundTransparency = 1, -- Start hidden
+        BackgroundTransparency = 1,
         Parent = CloseButton
     }, {
         Serenity.Creator.New("UICorner", {
@@ -190,7 +190,7 @@ return function(Serenity, Config)
         Size = UDim2.new(0, 16, 0, 16),
         Position = UDim2.new(0.5, -8, 0.5, -8),
         BackgroundTransparency = 1,
-        Image = "rbxassetid://114783304987099", -- New close icon
+        Image = "rbxassetid://114783304987099",
         ImageColor3 = Color3.fromRGB(255, 255, 255),
         Parent = CloseButton
     })
@@ -318,18 +318,7 @@ return function(Serenity, Config)
         Window:Minimize()
     end)
 
-    -- Update tab holder size
-    local function updateTabHolderSize()
-        local layout = Window.TabHolder:FindFirstChild("UIListLayout")
-        if layout then
-            Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
-        end
-    end
-
-    local layout = Window.TabHolder:WaitForChild("UIListLayout")
-    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
-
-    -- Store tabs in proper order using sequential table
+    -- Store tabs in exact order
     Window.OrderedTabs = {}
     Window.TabCount = 0
 
@@ -405,14 +394,13 @@ return function(Serenity, Config)
         -- Get text bounds for underline
         local textBounds = tabLabel.TextBounds
 
-        -- Underline (initially hidden with 0 width)
+        -- Underline (initially hidden except for first tab)
         local underline = Serenity.Creator.New("Frame", {
             Name = "Underline",
-            Size = UDim2.new(0, 0, 0, 2),
-            Position = UDim2.new(0.5, 0, 1, 0),
-            AnchorPoint = Vector2.new(0.5, 0),
+            Size = UDim2.new(1, 0, 0, 2),
+            Position = UDim2.new(0, 0, 1, 0),
             BackgroundColor3 = Color3.fromRGB(140, 70, 255),
-            BackgroundTransparency = 1,
+            BackgroundTransparency = tabIndex == 1 and 0 or 1, -- Show for first tab only
             BorderSizePixel = 0,
             Parent = labelContainer
         }, {
@@ -489,8 +477,9 @@ return function(Serenity, Config)
             return divider
         end
 
-        -- Add tab divider (between tabs in sidebar)
+        -- Add tab divider (between tabs in sidebar) - FIXED POSITION
         function tab:AddTabDivider()
+            -- Create the divider as a sibling to the current tab button
             local tabDivider = Serenity.Creator.New("Frame", {
                 Name = "TabDivider",
                 Size = UDim2.new(1, -10, 0, 1),
@@ -498,6 +487,7 @@ return function(Serenity, Config)
                 BackgroundColor3 = Color3.fromRGB(55, 55, 55),
                 BackgroundTransparency = 0.7,
                 BorderSizePixel = 0,
+                LayoutOrder = tabButton.LayoutOrder + 1, -- Place it after the current tab
                 Parent = Window.TabHolder
             }, {
                 Serenity.Creator.New("UICorner", {
@@ -720,7 +710,7 @@ return function(Serenity, Config)
             return section
         end
 
-        -- Tab selection function
+        -- Tab selection function - FIXED UNDERLINE PERSISTENCE
         local function selectTab()
             -- Hide all tabs and reset appearance
             for i, otherTab in ipairs(Window.OrderedTabs) do
@@ -728,11 +718,8 @@ return function(Serenity, Config)
                 otherTab.Label.TextColor3 = Color3.fromRGB(200, 200, 200)
                 otherTab.IsSelected = false
                 
-                -- Hide underline
-                TweenService:Create(otherTab.Underline, TweenInfo.new(0.2), {
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(0, 0, 0, 2)
-                }):Play()
+                -- KEEP UNDERLINE HIDDEN for non-selected tabs
+                otherTab.Underline.BackgroundTransparency = 1
             end
             
             -- Show selected tab
@@ -740,14 +727,8 @@ return function(Serenity, Config)
             tab.Label.TextColor3 = Color3.fromRGB(255, 255, 255)
             tab.IsSelected = true
             
-            -- Animate underline from center
+            -- SHOW UNDERLINE for selected tab (no animation, just show it)
             tab.Underline.BackgroundTransparency = 0
-            tab.Underline.Size = UDim2.new(0, 0, 0, 2)
-            tab.Underline.Position = UDim2.new(0.5, 0, 1, 0)
-            
-            TweenService:Create(tab.Underline, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(1, 0, 0, 2)
-            }):Play()
             
             Window.SelectedTab = tabIndex
         end
@@ -755,16 +736,29 @@ return function(Serenity, Config)
         -- Tab switching
         tabButton.MouseButton1Click:Connect(selectTab)
 
-        -- Store tab in ordered array
+        -- Store tab in ordered array - FIXED ORDER
         Window.OrderedTabs[tabIndex] = tab
-        Window.Tabs[tabConfig.Title] = tab
+        
+        -- Set layout order to maintain exact order
+        tabButton.LayoutOrder = tabIndex
         
         -- Select first tab
         if tabIndex == 1 then
             selectTab()
         end
 
+        -- Update tab holder size
+        local function updateTabHolderSize()
+            local layout = Window.TabHolder:FindFirstChild("UIListLayout")
+            if layout then
+                Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+            end
+        end
+
+        local layout = Window.TabHolder:WaitForChild("UIListLayout")
+        layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
         updateTabHolderSize()
+
         return tab
     end
 
