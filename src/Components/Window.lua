@@ -839,8 +839,15 @@ return function(Serenity, Config)
             end
 
             function section:AddDropdown(dropdownConfig)
-                -- Use the proper Dropdown component instead of the simplified version
-                local DropdownComponent = require(script.Parent.Parent.Components.Dropdown)
+                -- Use the proper Dropdown component
+                local success, DropdownComponent = pcall(function()
+                    return require(script.Parent.Parent.Parent.Components.Dropdown)
+                end)
+    
+                if not success then
+                    -- Fallback to absolute path
+                    DropdownComponent = require(game:GetService("ReplicatedStorage"):WaitForChild("Serenity"):WaitForChild("Components"):WaitForChild("Dropdown"))
+                end
     
                 local dropdown = DropdownComponent({
                     Title = dropdownConfig.Title,
