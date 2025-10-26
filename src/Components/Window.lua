@@ -95,14 +95,6 @@ return function(Serenity, Config)
         return iconId
     end
 
-    -- Function to get icon
-    local function getIcon(iconName)
-        if not iconName or iconName == "" then
-            return nil
-        end
-        return CustomIcons[iconName]
-    end
-
     -- Create main window
     Window.ScreenGui = Serenity.Creator.New("ScreenGui", {
         Name = "SerenityUI",
@@ -425,8 +417,8 @@ return function(Serenity, Config)
         if iconId then
             textPosition = UDim2.new(0, 35, 0.5, 0)
             
-            -- Icon
-            Serenity.Creator.New("ImageLabel", {
+            -- Icon (FIXED: Proper icon implementation)
+            local iconLabel = Serenity.Creator.New("ImageLabel", {
                 Name = "Icon",
                 AnchorPoint = Vector2.new(0, 0.5),
                 Size = UDim2.new(0, 16, 0, 16),
@@ -436,6 +428,10 @@ return function(Serenity, Config)
                 ImageColor3 = Color3.fromRGB(200, 200, 200),
                 Parent = tabButton
             })
+            
+            print("📝 Created icon for " .. tabConfig.Title .. ": " .. iconId)
+        else
+            print("📝 No icon for " .. tabConfig.Title)
         end
 
         -- Tab label container
