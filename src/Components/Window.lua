@@ -205,7 +205,7 @@ return function(Serenity, Config)
         Parent = Window.Root
     })
 
-    -- Tab buttons container
+    -- Tab buttons container (FIXED: Added SortOrder)
     Window.TabHolder = Serenity.Creator.New("ScrollingFrame", {
         Name = "TabHolder",
         Size = UDim2.new(1, -10, 1, -10),
@@ -218,7 +218,8 @@ return function(Serenity, Config)
         Parent = Window.TabContainer
     }, {
         Serenity.Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 0)
+            Padding = UDim.new(0, 0),
+            SortOrder = Enum.SortOrder.LayoutOrder  -- FIX: Force LayoutOrder sorting
         })
     })
 
@@ -342,12 +343,13 @@ return function(Serenity, Config)
         -- Get icon
         local iconId = getIcon(tabConfig.Icon)
         
-        -- Create tab button
+        -- Create tab button (FIXED: Added LayoutOrder)
         local tabButton = Serenity.Creator.New("TextButton", {
             Name = tabConfig.Title .. "Tab",
             Size = UDim2.new(1, 0, 0, 40),
             BackgroundTransparency = 1,
             Text = "",
+            LayoutOrder = tabIndex,  -- FIX: Set explicit order
             Parent = Window.TabHolder
         })
 
@@ -486,7 +488,7 @@ return function(Serenity, Config)
             return divider
         end
 
-        -- Add tab divider (between tabs in sidebar) - FIXED: Add after current tab
+        -- Add tab divider (between tabs in sidebar) - FIXED: Added LayoutOrder
         function tab:AddTabDivider()
             local tabDivider = Serenity.Creator.New("Frame", {
                 Name = "TabDivider",
@@ -495,6 +497,7 @@ return function(Serenity, Config)
                 BackgroundColor3 = Color3.fromRGB(55, 55, 55),
                 BackgroundTransparency = 0.7,
                 BorderSizePixel = 0,
+                LayoutOrder = tabIndex + 0.5,  -- FIX: Place between tabs
                 Parent = Window.TabHolder
             }, {
                 Serenity.Creator.New("UICorner", {
