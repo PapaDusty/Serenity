@@ -134,8 +134,8 @@ return function(Serenity, Config)
     -- Control buttons (swapped positions)
     local ButtonContainer = Serenity.Creator.New("Frame", {
         Name = "Controls",
-        Size = UDim2.new(0, 60, 1, 0),
-        Position = UDim2.new(1, -65, 0, 2),
+        Size = UDim2.new(0, 52, 0.85, 0),
+        Position = UDim2.new(1, -55, 0, 3),
         BackgroundTransparency = 1,
         Parent = TitleBar
     }, {
@@ -548,7 +548,7 @@ return function(Serenity, Config)
             -- Section title (clickable area)
             local sectionTitle = Serenity.Creator.New("TextButton", {
                 Name = "Title",
-                Size = UDim2.new(1, -40, 0, 30),
+                Size = UDim2.new(1, -10, 0, 30),
                 Position = UDim2.fromOffset(10, 5),
                 BackgroundTransparency = 1,
                 Text = "",
