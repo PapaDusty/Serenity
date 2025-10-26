@@ -1,9 +1,9 @@
-
 return function(Config, Parent)
-    local Creator = require(script.Parent.Parent.Creator)
+    local Serenity = require(script.Parent.Parent)
     
     local Toggle = {
-        Value = Config.Default or false
+        Value = Config.Default or false,
+        Type = "Toggle"
     }
 
     local ToggleFrame = Creator.New("Frame", {
