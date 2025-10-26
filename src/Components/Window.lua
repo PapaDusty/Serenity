@@ -32,8 +32,6 @@ return function(Serenity, Config)
     
     if success and type(result) == "table" then
         Icons = result
-    else
-        print("Icons failed to load")
     end
 
     -- Function to get icon
@@ -107,7 +105,6 @@ return function(Serenity, Config)
         AnchorPoint = Vector2.new(0, 0.5),
         BackgroundTransparency = 1,
         Image = "rbxassetid://118034688779559",
-        ImageColor3 = Color3.fromRGB(255, 255, 255),
         Parent = TitleContainer
     })
 
@@ -217,6 +214,59 @@ return function(Serenity, Config)
         Parent = CloseButton
     })
 
+    -- Info Container (at the bottom)
+    Window.InfoContainer = Serenity.Creator.New("Frame", {
+        Name = "InfoContainer",
+        Size = UDim2.new(1, 0, 0, 28),
+        Position = UDim2.new(0, 0, 1, -28),
+        BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+        BorderSizePixel = 0,
+        Parent = Window.Root
+    }, {
+        Serenity.Creator.New("UICorner", {
+            CornerRadius = UDim.new(0, 0, 0, 8)
+        })
+    })
+
+    -- Info container divider line (on top)
+    Serenity.Creator.New("Frame", {
+        Name = "InfoDivider",
+        Size = UDim2.new(1, 0, 0, 1),
+        BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+        BorderSizePixel = 0,
+        Parent = Window.InfoContainer
+    })
+
+    -- Player avatar
+    local Avatar = Serenity.Creator.New("ImageLabel", {
+        Name = "Avatar",
+        Size = UDim2.new(0, 20, 0, 20),
+        Position = UDim2.new(0, 8, 0.5, 0),
+        AnchorPoint = Vector2.new(0, 0.5),
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        BackgroundTransparency = 1,
+        Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=150&height=150&format=png",
+        Parent = Window.InfoContainer
+    }, {
+        Serenity.Creator.New("UICorner", {
+            CornerRadius = UDim.new(1, 0)
+        })
+    })
+
+    -- Player display name
+    Serenity.Creator.New("TextLabel", {
+        Name = "PlayerName",
+        Size = UDim2.new(1, -35, 1, 0),
+        Position = UDim2.new(0, 35, 0, 0),
+        BackgroundTransparency = 1,
+        Text = player.DisplayName,
+        TextColor3 = Color3.fromRGB(200, 200, 200),
+        TextSize = 12,
+        Font = Enum.Font.GothamSemibold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = Window.InfoContainer
+    })
+
     -- Tab navigation area
     Window.TabContainer = Serenity.Creator.New("Frame", {
         Name = "TabContainer",
@@ -264,10 +314,6 @@ return function(Serenity, Config)
         BackgroundTransparency = 1,
         Parent = Window.Root
     })
-
-    -- Create InfoContainer
-    local InfoContainerModule = require(script.Parent.InfoContainer)
-    Window.InfoContainer = InfoContainerModule(Serenity, Window)
 
     -- Dragging functionality
     local function UpdateDrag(input)
@@ -356,7 +402,7 @@ return function(Serenity, Config)
     local layout = Window.TabHolder:WaitForChild("UIListLayout")
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
 
-    -- Store tabs in proper order
+    -- Store tabs in proper order using an array
     Window.OrderedTabs = {}
     Window.TabCount = 0
 
@@ -496,17 +542,42 @@ return function(Serenity, Config)
         contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateContentSize)
         updateContentSize()
 
-        -- Load tab dividers module
-        local TabDividers = require(script.Parent.TabDividers)
-        
         -- Add divider element to tab content
         function tab:AddDivider()
-            return TabDividers:AddContentDivider(tabContent)
+            local divider = Serenity.Creator.New("Frame", {
+                Name = "Divider",
+                Size = UDim2.new(1, 0, 0, 1),
+                BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+                BackgroundTransparency = 0.7,
+                BorderSizePixel = 0,
+                Parent = tabContent
+            }, {
+                Serenity.Creator.New("UICorner", {
+                    CornerRadius = UDim.new(1, 0)
+                })
+            })
+            
+            return divider
         end
 
-        -- Add tab divider (between tabs in sidebar)
+        -- Add tab divider
         function tab:AddTabDivider()
-            return TabDividers:AddTabDivider(Window.TabHolder, tabIndex)
+            local tabDivider = Serenity.Creator.New("Frame", {
+                Name = "TabDivider",
+                Size = UDim2.new(1, -10, 0, 1),
+                Position = UDim2.new(0, 5, 0, 0),
+                BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+                BackgroundTransparency = 0.7,
+                BorderSizePixel = 0,
+                LayoutOrder = tabIndex + 0.5,
+                Parent = Window.TabHolder
+            }, {
+                Serenity.Creator.New("UICorner", {
+                    CornerRadius = UDim.new(1, 0)
+                })
+            })
+            
+            return tabDivider
         end
 
         function tab:AddSection(sectionConfig)
@@ -528,7 +599,7 @@ return function(Serenity, Config)
                 })
             })
 
-            -- Section title (clickable area)
+            -- Section title
             local sectionTitle = Serenity.Creator.New("TextButton", {
                 Name = "Title",
                 Size = UDim2.new(1, -10, 0, 30),
@@ -552,7 +623,7 @@ return function(Serenity, Config)
                 Parent = sectionTitle
             })
 
-            -- Section icon (top right)
+            -- Section icon
             local sectionIcon = Serenity.Creator.New("ImageLabel", {
                 Name = "SectionIcon",
                 Size = UDim2.new(0, 16, 0, 16),
@@ -605,14 +676,10 @@ return function(Serenity, Config)
             local function toggleSection()
                 section.IsOpen = not section.IsOpen
                 elementsContainer.Visible = section.IsOpen
-                
-                -- Update icon
                 sectionIcon.Image = "rbxassetid://" .. (section.IsOpen and "106435270493821" or "76847249215450")
-                
                 updateSectionSize()
             end
 
-            -- Make section title clickable
             sectionTitle.MouseButton1Click:Connect(toggleSection)
 
             function section:AddToggle(toggleConfig)
@@ -690,7 +757,6 @@ return function(Serenity, Config)
                     end
                 end)
 
-                -- Hover effects
                 toggleBox.MouseEnter:Connect(function()
                     if not toggleValue then
                         toggleBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
@@ -734,7 +800,6 @@ return function(Serenity, Config)
                     })
                 })
 
-                -- Hover effects
                 button.MouseEnter:Connect(function()
                     button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
                 end)
@@ -759,7 +824,6 @@ return function(Serenity, Config)
 
         -- Tab selection function
         local function selectTab()
-            -- Hide all tabs and reset appearance
             for i = 1, #Window.OrderedTabs do
                 local otherTab = Window.OrderedTabs[i]
                 if otherTab then
@@ -768,7 +832,6 @@ return function(Serenity, Config)
                     otherTab.Label.TextSize = 14
                     otherTab.IsSelected = false
                     
-                    -- Hide underline
                     TweenService:Create(otherTab.Underline, TweenInfo.new(0.2), {
                         BackgroundTransparency = 1,
                         Size = UDim2.new(0, 0, 0, 2)
@@ -776,13 +839,11 @@ return function(Serenity, Config)
                 end
             end
             
-            -- Show selected tab
             tabContent.Visible = true
             tab.Label.TextColor3 = Color3.fromRGB(255, 255, 255)
             tab.Label.TextSize = 16
             tab.IsSelected = true
             
-            -- Animate underline
             tab.Underline.BackgroundTransparency = 0
             tab.Underline.Size = UDim2.new(0, 0, 0, 2)
             tab.Underline.Position = UDim2.new(0.5, 0, 1, 0)
@@ -794,13 +855,11 @@ return function(Serenity, Config)
             Window.SelectedTab = tabIndex
         end
 
-        -- Tab switching
         tabButton.MouseButton1Click:Connect(selectTab)
 
         table.insert(Window.OrderedTabs, tab)
         Window.Tabs[tabConfig.Title] = tab
         
-        -- Select first tab
         if tabIndex == 1 then
             selectTab()
         end
