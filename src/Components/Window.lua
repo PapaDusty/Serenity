@@ -24,67 +24,31 @@ return function(Serenity, Config)
 
     local Dragging, DragInput, MousePos, StartPos = false
 
-    -- Load custom icons
-    local CustomIcons = {}
+    -- Load icons from external file
+    local Icons = {}
     local success, result = pcall(function()
         return loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/icons.lua"))()
     end)
     
     if success and type(result) == "table" then
-        CustomIcons = result
-        print("✅ Custom icons loaded successfully")
+        Icons = result
+        print("✅ Icons loaded successfully")
         -- Debug: Print available icons
         print("🔍 Available icons:")
-        for iconName, iconId in pairs(CustomIcons) do
+        for iconName, iconId in pairs(Icons) do
             print("   " .. iconName .. " -> " .. iconId)
         end
     else
-        print("⚠️ Custom icons failed to load: " .. tostring(result))
-        -- Fallback to default icons
-        CustomIcons = {
-            house = "116543637337872",
-            target = "114783304987099", 
-            backpack = "10734961420",
-            ["map-pin"] = "76847249215450",
-            calendar = "106435270493821",
-            settings = "114783304987099",
-            link = "116543637337872",
-            user = "10734961420"
-        }
-        print("🔄 Using fallback icons")
+        print("❌ Icons failed to load: " .. tostring(result))
     end
 
-    -- Function to get icon (IMPROVED)
+    -- Function to get icon
     local function getIcon(iconName)
         if not iconName or iconName == "" then
             return nil
         end
         
-        local iconId = CustomIcons[iconName]
-        
-        -- If icon not found, try common alternatives
-        if not iconId then
-            local fallbacks = {
-                house = "house",
-                home = "house",
-                updates = "house",
-                farm = "target",
-                autofarm = "target",
-                items = "backpack",
-                inventory = "backpack",
-                teleport = "map-pin",
-                locations = "map-pin",
-                events = "calendar",
-                misc = "settings",
-                webhook = "link",
-                settings = "settings",
-                user = "user"
-            }
-            
-            if fallbacks[iconName:lower()] then
-                iconId = CustomIcons[fallbacks[iconName:lower()]]
-            end
-        end
+        local iconId = Icons[iconName]
         
         if iconId then
             print("🎯 Using icon: " .. iconName .. " -> " .. iconId)
@@ -417,7 +381,7 @@ return function(Serenity, Config)
         if iconId then
             textPosition = UDim2.new(0, 35, 0.5, 0)
             
-            -- Icon (FIXED: Proper icon implementation)
+            -- Icon
             local iconLabel = Serenity.Creator.New("ImageLabel", {
                 Name = "Icon",
                 AnchorPoint = Vector2.new(0, 0.5),
