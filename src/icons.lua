@@ -3279,18 +3279,3 @@ return {
 	["wine-off"] = 128440413658301,
 	["wine"] = 73532622126175,
 }
-
-e.g.
-⛵️ a ship in the ocean
-👩 a woman in the city
-
-
-Powered by AITOPIA 
-Chat
-Ask
-Search
-Write
-Image
-ChatFile
-Vision
-Full Page
