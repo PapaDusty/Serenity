@@ -267,29 +267,35 @@ return function(Serenity, Config)
         Parent = Window.InfoContainer
     })
 
-    -- Guest text on the right (without underline since TextDecorations isn't supported)
-    -- Guest text on the right with simple underline
-    local GuestText = Serenity.Creator.New("TextLabel", {
-        Name = "GuestText",
+     -- Guest text on the right
+    local GuestContainer = Serenity.Creator.New("Frame", {
+        Name = "GuestContainer",
         Size = UDim2.new(0.3, 0, 1, 0),
         Position = UDim2.new(0.7, 0, 0, 0),
+        BackgroundTransparency = 1,
+        Parent = Window.InfoContainer
+    })
+
+    Serenity.Creator.New("TextLabel", {
+        Name = "GuestText",
+        Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
         Text = "Guest",
         TextColor3 = Color3.fromRGB(150, 150, 150),
         TextSize = 12,
         Font = Enum.Font.Gotham,
         TextXAlignment = Enum.TextXAlignment.Right,
-        Parent = Window.InfoContainer
+        Parent = GuestContainer
     })
 
-    -- Add underline directly under the text
+    -- Manual underline
     Serenity.Creator.New("Frame", {
         Name = "Underline",
-        Size = UDim2.new(0.4, 0, 0, 1),
-        Position = UDim2.new(0.6, 0, 0.9, 0),
+        Size = UDim2.new(0.8, 0, 0, 1),
+        Position = UDim2.new(0.1, 0, 1, -2),
         BackgroundColor3 = Color3.fromRGB(150, 150, 150),
         BorderSizePixel = 0,
-        Parent = GuestText
+        Parent = GuestContainer
     })
 
     -- Tab navigation area
