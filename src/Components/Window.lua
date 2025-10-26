@@ -318,7 +318,18 @@ return function(Serenity, Config)
         Window:Minimize()
     end)
 
-    -- Store tabs in exact order
+    -- Update tab holder size
+    local function updateTabHolderSize()
+        local layout = Window.TabHolder:FindFirstChild("UIListLayout")
+        if layout then
+            Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+        end
+    end
+
+    local layout = Window.TabHolder:WaitForChild("UIListLayout")
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
+
+    -- Store tabs in proper order - FIXED: Use array to maintain order
     Window.OrderedTabs = {}
     Window.TabCount = 0
 
@@ -384,7 +395,7 @@ return function(Serenity, Config)
             BackgroundTransparency = 1,
             Text = tabConfig.Title,
             TextColor3 = Color3.fromRGB(200, 200, 200),
-            TextSize = 14,
+            TextSize = 14, -- Normal size
             Font = Enum.Font.GothamBold,
             TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Center,
@@ -394,13 +405,14 @@ return function(Serenity, Config)
         -- Get text bounds for underline
         local textBounds = tabLabel.TextBounds
 
-        -- Underline (initially hidden except for first tab)
+        -- Underline (initially hidden with 0 width)
         local underline = Serenity.Creator.New("Frame", {
             Name = "Underline",
-            Size = UDim2.new(1, 0, 0, 2),
-            Position = UDim2.new(0, 0, 1, 0),
+            Size = UDim2.new(0, 0, 0, 2),
+            Position = UDim2.new(0.5, 0, 1, 0),
+            AnchorPoint = Vector2.new(0.5, 0),
             BackgroundColor3 = Color3.fromRGB(140, 70, 255),
-            BackgroundTransparency = tabIndex == 1 and 0 or 1, -- Show for first tab only
+            BackgroundTransparency = 1,
             BorderSizePixel = 0,
             Parent = labelContainer
         }, {
@@ -477,9 +489,8 @@ return function(Serenity, Config)
             return divider
         end
 
-        -- Add tab divider (between tabs in sidebar) - FIXED POSITION
+        -- Add tab divider (between tabs in sidebar) - FIXED: Add after current tab
         function tab:AddTabDivider()
-            -- Create the divider as a sibling to the current tab button
             local tabDivider = Serenity.Creator.New("Frame", {
                 Name = "TabDivider",
                 Size = UDim2.new(1, -10, 0, 1),
@@ -487,7 +498,6 @@ return function(Serenity, Config)
                 BackgroundColor3 = Color3.fromRGB(55, 55, 55),
                 BackgroundTransparency = 0.7,
                 BorderSizePixel = 0,
-                LayoutOrder = tabButton.LayoutOrder + 1, -- Place it after the current tab
                 Parent = Window.TabHolder
             }, {
                 Serenity.Creator.New("UICorner", {
@@ -517,18 +527,39 @@ return function(Serenity, Config)
                 })
             })
 
-            -- Section title
-            local sectionTitle = Serenity.Creator.New("TextLabel", {
+            -- Section title (clickable area)
+            local sectionTitle = Serenity.Creator.New("TextButton", {
                 Name = "Title",
                 Size = UDim2.new(1, -40, 0, 30),
                 Position = UDim2.fromOffset(10, 5),
+                BackgroundTransparency = 1,
+                Text = "",
+                Parent = sectionFrame
+            })
+
+            -- Section title text
+            Serenity.Creator.New("TextLabel", {
+                Name = "TitleText",
+                Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
                 Text = sectionConfig.Title,
                 TextColor3 = Color3.fromRGB(150, 150, 150),
                 TextSize = 12,
                 Font = Enum.Font.GothamSemibold,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = sectionFrame
+                TextYAlignment = Enum.TextYAlignment.Center,
+                Parent = sectionTitle
+            })
+
+            -- Section icon (top right)
+            local sectionIcon = Serenity.Creator.New("ImageLabel", {
+                Name = "SectionIcon",
+                Size = UDim2.new(0, 16, 0, 16),
+                Position = UDim2.new(1, -25, 0.5, -8),
+                BackgroundTransparency = 1,
+                Image = "rbxassetid://" .. (isOpen and "106435270493821" or "76847249215450"),
+                ImageColor3 = Color3.fromRGB(150, 150, 150),
+                Parent = sectionTitle
             })
 
             -- Elements container
@@ -549,7 +580,8 @@ return function(Serenity, Config)
                 Frame = sectionFrame,
                 Container = elementsContainer,
                 IsOpen = isOpen,
-                Title = sectionTitle
+                Title = sectionTitle,
+                Icon = sectionIcon
             }
 
             -- Update section size
@@ -567,6 +599,20 @@ return function(Serenity, Config)
             local elementsLayout = elementsContainer:WaitForChild("UIListLayout")
             elementsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionSize)
             updateSectionSize()
+
+            -- Toggle section visibility
+            local function toggleSection()
+                section.IsOpen = not section.IsOpen
+                elementsContainer.Visible = section.IsOpen
+                
+                -- Update icon
+                sectionIcon.Image = "rbxassetid://" .. (section.IsOpen and "106435270493821" or "76847249215450")
+                
+                updateSectionSize()
+            end
+
+            -- Make section title clickable
+            sectionTitle.MouseButton1Click:Connect(toggleSection)
 
             function section:AddToggle(toggleConfig)
                 local toggleFrame = Serenity.Creator.New("Frame", {
@@ -710,25 +756,36 @@ return function(Serenity, Config)
             return section
         end
 
-        -- Tab selection function - FIXED UNDERLINE PERSISTENCE
+        -- Tab selection function with slower animation and bigger text
         local function selectTab()
             -- Hide all tabs and reset appearance
             for i, otherTab in ipairs(Window.OrderedTabs) do
                 otherTab.Content.Visible = false
                 otherTab.Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+                otherTab.Label.TextSize = 14 -- Reset to normal size
                 otherTab.IsSelected = false
                 
-                -- KEEP UNDERLINE HIDDEN for non-selected tabs
-                otherTab.Underline.BackgroundTransparency = 1
+                -- Hide underline
+                TweenService:Create(otherTab.Underline, TweenInfo.new(0.2), {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(0, 0, 0, 2)
+                }):Play()
             end
             
             -- Show selected tab
             tabContent.Visible = true
             tab.Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tab.Label.TextSize = 16 -- Bigger text for selected tab
             tab.IsSelected = true
             
-            -- SHOW UNDERLINE for selected tab (no animation, just show it)
+            -- Animate underline from center (slower animation)
             tab.Underline.BackgroundTransparency = 0
+            tab.Underline.Size = UDim2.new(0, 0, 0, 2)
+            tab.Underline.Position = UDim2.new(0.5, 0, 1, 0)
+            
+            TweenService:Create(tab.Underline, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { -- Slower: 0.5 seconds
+                Size = UDim2.new(1, 0, 0, 2)
+            }):Play()
             
             Window.SelectedTab = tabIndex
         end
@@ -736,29 +793,16 @@ return function(Serenity, Config)
         -- Tab switching
         tabButton.MouseButton1Click:Connect(selectTab)
 
-        -- Store tab in ordered array - FIXED ORDER
+        -- Store tab in ordered array - FIXED: Use array indexing
         Window.OrderedTabs[tabIndex] = tab
-        
-        -- Set layout order to maintain exact order
-        tabButton.LayoutOrder = tabIndex
+        Window.Tabs[tabConfig.Title] = tab
         
         -- Select first tab
         if tabIndex == 1 then
             selectTab()
         end
 
-        -- Update tab holder size
-        local function updateTabHolderSize()
-            local layout = Window.TabHolder:FindFirstChild("UIListLayout")
-            if layout then
-                Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
-            end
-        end
-
-        local layout = Window.TabHolder:WaitForChild("UIListLayout")
-        layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabHolderSize)
         updateTabHolderSize()
-
         return tab
     end
 
