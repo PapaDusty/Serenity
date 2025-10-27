@@ -873,7 +873,7 @@ return function(Serenity, Config)
                     Size = UDim2.new(0, 14, 0, 14),
                     Position = UDim2.new(0.5, -7, 0.5, -7),
                     BackgroundTransparency = 1,
-                    Image = "rbxassetid://132636289005348",
+                    Image = "rbxassetid://10734961420",
                     ImageColor3 = Color3.fromRGB(255, 255, 255),
                     Visible = false,
                     Parent = toggleBox
