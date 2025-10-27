@@ -34,6 +34,16 @@ return function(Serenity, Config)
         Icons = result
     end
 
+    -- Load executor assets
+    local ExecutorAssets = {}
+    local success, assetsResult = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/Assets.lua"))()
+    end)
+    
+    if success and type(assetsResult) == "table" then
+        ExecutorAssets = assetsResult
+    end
+
     -- Load executor detection
     local ExecutorName = "Unknown"
     local success, executorResult = pcall(function()
@@ -50,6 +60,16 @@ return function(Serenity, Config)
             return nil
         end
         return Icons[iconName]
+    end
+
+    -- Function to get executor icon ID
+    local function getExecutorIcon(executorName)
+        for name, iconId in pairs(ExecutorAssets) do
+            if string.find(executorName:lower(), name:lower()) then
+                return iconId
+            end
+        end
+        return "118034688779559" -- Default Roblox icon
     end
 
     -- Create main window
@@ -125,20 +145,27 @@ return function(Serenity, Config)
         Parent = TitleContainer
     })
 
-    -- Title text with animated color
-    local TitleText = Serenity.Creator.New("TextLabel", {
-        Name = "Title",
-        AutomaticSize = Enum.AutomaticSize.X,
-        BackgroundTransparency = 1,
-        Text = "serenity.wtf",
-        TextColor3 = Color3.fromRGB(180, 120, 255), -- Initial purple
-        TextSize = 14,
-        Font = Enum.Font.GothamBold,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = TitleContainer
-    })
+    -- Individual letter frames for animated title
+    local titleText = "serenity.wtf"
+    local letterFrames = {}
+    
+    for i = 1, #titleText do
+        local letter = string.sub(titleText, i, i)
+        local letterFrame = Serenity.Creator.New("TextLabel", {
+            Name = "Letter" .. i,
+            Size = UDim2.new(0, 8, 1, 0),
+            BackgroundTransparency = 1,
+            Text = letter,
+            TextColor3 = Color3.fromRGB(180, 120, 255),
+            TextSize = 14,
+            Font = Enum.Font.GothamBold,
+            TextXAlignment = Enum.TextXAlignment.Center,
+            Parent = TitleContainer
+        })
+        table.insert(letterFrames, letterFrame)
+    end
 
-    -- Color animation for title text
+    -- Color animation for individual letters
     local colorPresets = {
         Color3.fromRGB(180, 120, 255), -- Light purple
         Color3.fromRGB(220, 100, 255), -- Bright purple
@@ -147,24 +174,20 @@ return function(Serenity, Config)
         Color3.fromRGB(140, 100, 255), -- Blueish purple
     }
 
-    local currentColorIndex = 1
-    local function animateTitleColor()
+    local function animateLetters()
         while true do
-            currentColorIndex = currentColorIndex + 1
-            if currentColorIndex > #colorPresets then
-                currentColorIndex = 1
+            for i, letterFrame in ipairs(letterFrames) do
+                local colorIndex = ((i + os.clock() * 2) % #colorPresets) + 1
+                TweenService:Create(letterFrame, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    TextColor3 = colorPresets[math.floor(colorIndex)]
+                }):Play()
             end
-            
-            TweenService:Create(TitleText, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                TextColor3 = colorPresets[currentColorIndex]
-            }):Play()
-            
-            wait(2) -- Change color every 2 seconds
+            wait(0.1)
         end
     end
 
-    -- Start color animation
-    spawn(animateTitleColor)
+    -- Start letter animation
+    spawn(animateLetters)
 
     -- Subtitle (on the left)
     local SubTitleText = Serenity.Creator.New("TextLabel", {
@@ -314,8 +337,8 @@ return function(Serenity, Config)
     -- Executor container (replaces SubTitleContainer)
     local ExecutorContainer = Serenity.Creator.New("Frame", {
         Name = "ExecutorContainer",
-        Size = UDim2.new(0, 120, 1, 0),
-        Position = UDim2.new(1, -125, 0, 0),
+        Size = UDim2.new(0, 140, 1, 0), -- Wider for bigger text
+        Position = UDim2.new(1, -145, 0, 0), -- More to the left
         BackgroundTransparency = 1,
         Parent = Window.InfoContainer
     }, {
@@ -323,28 +346,31 @@ return function(Serenity, Config)
             FillDirection = Enum.FillDirection.Horizontal,
             HorizontalAlignment = Enum.HorizontalAlignment.Right,
             VerticalAlignment = Enum.VerticalAlignment.Center,
-            Padding = UDim.new(0, 5)
+            Padding = UDim.new(0, 6) -- Closer spacing
         })
     })
 
-    -- Roblox icon for executor
+    -- Get executor icon ID
+    local executorIconId = getExecutorIcon(ExecutorName)
+
+    -- Executor icon (bigger)
     local ExecutorIcon = Serenity.Creator.New("ImageLabel", {
         Name = "ExecutorIcon",
-        Size = UDim2.new(0, 16, 0, 16),
+        Size = UDim2.new(0, 20, 0, 20), -- Bigger icon
         BackgroundTransparency = 1,
-        Image = "rbxassetid://118034688779559", -- Roblox icon
+        Image = "rbxassetid://" .. executorIconId,
         ImageColor3 = Color3.fromRGB(255, 255, 255),
         Parent = ExecutorContainer
     })
 
-    -- Executor text (white and bold) - no underline
+    -- Executor text (bigger and white)
     Serenity.Creator.New("TextLabel", {
         Name = "ExecutorText",
-        Size = UDim2.new(1, -20, 1, 0),
+        Size = UDim2.new(1, -26, 1, 0), -- Adjusted for bigger icon
         BackgroundTransparency = 1,
         Text = ExecutorName,
         TextColor3 = Color3.fromRGB(255, 255, 255),
-        TextSize = 12,
+        TextSize = 14, -- Bigger text
         Font = Enum.Font.GothamBold,
         TextXAlignment = Enum.TextXAlignment.Right,
         Parent = ExecutorContainer
@@ -775,7 +801,7 @@ return function(Serenity, Config)
             local function createButtonRow()
                 local rowFrame = Serenity.Creator.New("Frame", {
                     Name = "ButtonRow",
-                    Size = UDim2.new(1, 0, 0, 40),
+                    Size = UDim2.new(1, 0, 0, 36), -- Shorter height
                     BackgroundTransparency = 1,
                     Parent = elementsContainer
                 }, {
@@ -919,17 +945,17 @@ return function(Serenity, Config)
                     buttonWidth = 1 / (row.ButtonCount + 1)
                     -- Update existing buttons in the row
                     for _, existingButton in pairs(row.Buttons) do
-                        existingButton.Size = UDim2.new(buttonWidth, -4, 1, 0)
+                        existingButton.Size = UDim2.new(buttonWidth, -4, 0.9, 0) -- Shorter height
                     end
                 end
                 
-                -- Create button with gradient effect and border
+                -- Create button with dark background and white text (no gradient)
                 local button = Serenity.Creator.New("TextButton", {
                     Name = buttonConfig.Title .. "Button",
-                    Size = UDim2.new(buttonWidth, -4, 1, 0),
-                    BackgroundColor3 = Color3.fromRGB(35, 35, 35),
+                    Size = UDim2.new(buttonWidth, -4, 0.9, 0), -- Shorter height
+                    BackgroundColor3 = Color3.fromRGB(21, 21, 21), -- Dark background
                     Text = buttonConfig.Title,
-                    TextColor3 = Color3.fromRGB(255, 255, 255),
+                    TextColor3 = Color3.fromRGB(255, 255, 255), -- White text
                     TextSize = 14,
                     Font = Enum.Font.GothamSemibold,
                     Parent = row.Frame
@@ -940,14 +966,8 @@ return function(Serenity, Config)
                     Serenity.Creator.New("UIStroke", {
                         Color = Color3.fromRGB(100, 100, 100), -- Lighter grey border
                         Thickness = 1
-                    }),
-                    -- Gradient effect using UIGradient
-                    Serenity.Creator.New("UIGradient", {
-                        Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 25)),
-                            ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 45, 45))
-                        })
                     })
+                    -- No UIGradient - removed gradient effect
                 })
 
                 -- Store button in row
@@ -957,25 +977,25 @@ return function(Serenity, Config)
                 -- Click animation
                 button.MouseButton1Down:Connect(function()
                     TweenService:Create(button, TweenInfo.new(0.1), {
-                        BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                        BackgroundColor3 = Color3.fromRGB(40, 40, 40)
                     }):Play()
                 end)
 
                 button.MouseButton1Up:Connect(function()
                     TweenService:Create(button, TweenInfo.new(0.1), {
-                        BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                        BackgroundColor3 = Color3.fromRGB(21, 21, 21)
                     }):Play()
                 end)
 
                 button.MouseEnter:Connect(function()
                     TweenService:Create(button, TweenInfo.new(0.2), {
-                        BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                        BackgroundColor3 = Color3.fromRGB(35, 35, 35)
                     }):Play()
                 end)
 
                 button.MouseLeave:Connect(function()
                     TweenService:Create(button, TweenInfo.new(0.2), {
-                        BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                        BackgroundColor3 = Color3.fromRGB(21, 21, 21)
                     }):Play()
                 end)
 
