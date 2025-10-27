@@ -87,7 +87,7 @@ return function(Serenity, Config)
         Parent = TitleBar
     })
 
-    -- Title container with gradient text
+    -- Title container (centered like before)
     local TitleContainer = Serenity.Creator.New("Frame", {
         Name = "TitleContainer",
         Size = UDim2.new(0.4, 0, 1, 0),
@@ -115,42 +115,20 @@ return function(Serenity, Config)
         Parent = TitleContainer
     })
 
-    -- Title text with gradient effect
+    -- Title text with purple gradient effect
     local TitleText = Serenity.Creator.New("TextLabel", {
         Name = "Title",
         AutomaticSize = Enum.AutomaticSize.X,
         BackgroundTransparency = 1,
-        Text = Config.Title or "Serenity UI",
-        TextColor3 = Color3.fromRGB(180, 120, 255), -- Light purple
+        Text = "<font color=\"#ea80fc\">s</font><font color=\"#d946ef\">e</font><font color=\"#c026d3\">r</font><font color=\"#a855f7\">e</font><font color=\"#9333ea\">n</font><font color=\"#7e22ce\">i</font><font color=\"#6b21a8\">t</font><font color=\"#581c87\">y</font><font color=\"#3b0764\">.</font><font color=\"#701a75\">w</font><font color=\"#86198f\">t</font><font color=\"#a21caf\">f</font>",
+        RichText = true,
         TextSize = 14,
         Font = Enum.Font.GothamBold,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = TitleContainer
     })
 
-    -- Apply gradient effect using multiple text labels
-    local function applyGradientText(textLabel)
-        -- Create a subtle gradient effect using multiple layers
-        local darkPurpleLabel = Serenity.Creator.New("TextLabel", {
-            Name = "GradientShadow",
-            Size = UDim2.new(1, 0, 1, 0),
-            Position = UDim2.new(0, 0, 0, 1),
-            BackgroundTransparency = 1,
-            Text = textLabel.Text,
-            TextColor3 = Color3.fromRGB(100, 60, 180), -- Dark purple
-            TextSize = textLabel.TextSize,
-            Font = textLabel.Font,
-            TextXAlignment = textLabel.TextXAlignment,
-            ZIndex = textLabel.ZIndex - 1,
-            Parent = textLabel.Parent
-        })
-        
-        textLabel.ZIndex = textLabel.ZIndex + 1
-    end
-
-    applyGradientText(TitleText)
-
-    -- Subtitle (on the left) - This will also be used in the info container
+    -- Subtitle (on the left)
     local SubTitleText = Serenity.Creator.New("TextLabel", {
         Name = "SubTitle",
         Size = UDim2.new(0.3, 0, 1, 0),
@@ -164,7 +142,7 @@ return function(Serenity, Config)
         Parent = TitleBar
     })
 
-    -- Control buttons
+    -- Control buttons (EXACTLY like before)
     local ButtonContainer = Serenity.Creator.New("Frame", {
         Name = "Controls",
         Size = UDim2.new(0, 52, 0.85, 0),
@@ -178,72 +156,64 @@ return function(Serenity, Config)
         })
     })
 
-    -- Minimize button with icon
+    -- Minimize button with icon (EXACTLY like before)
     local MinButton = Serenity.Creator.New("TextButton", {
         Name = "Minimize",
-        Size = UDim2.new(0, 18, 0, 18), -- Shorter height
+        Size = UDim2.new(0, 22, 0, 22),
         BackgroundTransparency = 1,
         Text = "",
         Parent = ButtonContainer
     })
 
-    -- Minimize button background
+    -- Minimize button background (EXACTLY like before)
     local MinButtonBg = Serenity.Creator.New("Frame", {
         Name = "Background",
         Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(25, 25, 25), -- Darker color
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
         BackgroundTransparency = 1,
         Parent = MinButton
     }, {
         Serenity.Creator.New("UICorner", {
             CornerRadius = UDim.new(0, 4)
-        }),
-        Serenity.Creator.New("UIStroke", { -- Lighter grey border
-            Color = Color3.fromRGB(80, 80, 80),
-            Thickness = 1
         })
     })
 
-    -- Minimize icon
+    -- Minimize icon (EXACTLY like before)
     Serenity.Creator.New("ImageLabel", {
-        Size = UDim2.new(0, 12, 0, 12), -- Smaller icon
-        Position = UDim2.new(0.5, -6, 0.5, -6),
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(0.5, -8, 0.5, -8),
         BackgroundTransparency = 1,
         Image = "rbxassetid://116543637337872",
         ImageColor3 = Color3.fromRGB(255, 255, 255),
         Parent = MinButton
     })
 
-    -- Close button with icon
+    -- Close button with icon (EXACTLY like before)
     local CloseButton = Serenity.Creator.New("TextButton", {
         Name = "Close",
-        Size = UDim2.new(0, 18, 0, 18), -- Shorter height
+        Size = UDim2.new(0, 22, 0, 22),
         BackgroundTransparency = 1,
         Text = "",
         Parent = ButtonContainer
     })
 
-    -- Close button background
+    -- Close button background (EXACTLY like before)
     local CloseButtonBg = Serenity.Creator.New("Frame", {
         Name = "Background",
         Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(25, 25, 25), -- Darker color
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
         BackgroundTransparency = 1,
         Parent = CloseButton
     }, {
         Serenity.Creator.New("UICorner", {
             CornerRadius = UDim.new(0, 4)
-        }),
-        Serenity.Creator.New("UIStroke", { -- Lighter grey border
-            Color = Color3.fromRGB(80, 80, 80),
-            Thickness = 1
         })
     })
 
-    -- Close icon
+    -- Close icon (EXACTLY like before)
     Serenity.Creator.New("ImageLabel", {
-        Size = UDim2.new(0, 12, 0, 12), -- Smaller icon
-        Position = UDim2.new(0.5, -6, 0.5, -6),
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(0.5, -8, 0.5, -8),
         BackgroundTransparency = 1,
         Image = "rbxassetid://114783304987099",
         ImageColor3 = Color3.fromRGB(255, 255, 255),
@@ -421,7 +391,7 @@ return function(Serenity, Config)
         end
     end)
 
-    -- Button hover effects
+    -- Button hover effects (EXACTLY like before)
     MinButton.MouseEnter:Connect(function()
         TweenService:Create(MinButtonBg, TweenInfo.new(0.2), {
             BackgroundTransparency = 0
@@ -655,6 +625,7 @@ return function(Serenity, Config)
             local sectionConfig = sectionConfig or {}
             local isOpen = sectionConfig.Open ~= false
             
+            -- Updated section size from 0, -10, 0, 40 to 0, 3, 0, 40
             local sectionFrame = Serenity.Creator.New("Frame", {
                 Name = sectionConfig.Title .. "Section",
                 Size = UDim2.new(1, 3, 0, 40),
@@ -734,7 +705,7 @@ return function(Serenity, Config)
                 if section.IsOpen then
                     local elementsLayout = elementsContainer:FindFirstChild("UIListLayout")
                     if elementsLayout then
-                        sectionFrame.Size = UDim2.new(1, -10, 0, elementsLayout.AbsoluteContentSize.Y + 45)
+                        sectionFrame.Size = UDim2.new(1, 3, 0, elementsLayout.AbsoluteContentSize.Y + 45)
                     end
                 else
                     sectionFrame.Size = UDim2.new(1, 3, 0, 40)
@@ -796,30 +767,19 @@ return function(Serenity, Config)
                     Parent = elementsContainer
                 })
 
-                -- Toggle container for better visual appearance
-                local toggleContainer = Serenity.Creator.New("Frame", {
-                    Name = "ToggleContainer",
-                    Size = UDim2.new(1, 0, 0, 30),
-                    BackgroundTransparency = 1,
-                    Parent = toggleFrame
-                }, {
-                    Serenity.Creator.New("UIListLayout", {
-                        FillDirection = Enum.FillDirection.Horizontal,
-                        Padding = UDim.new(0, 10)
-                    })
-                })
-
-                -- Toggle box with smoother design
+                -- Toggle box (original checkbox style on the left)
                 local toggleBox = Serenity.Creator.New("TextButton", {
                     Name = "ToggleBox",
-                    Size = UDim2.new(0, 50, 0, 24), -- Wider for smoother look
+                    Size = UDim2.new(0, 20, 0, 20),
+                    Position = UDim2.new(0, 0, 0.5, 0),
+                    AnchorPoint = Vector2.new(0, 0.5),
                     BackgroundColor3 = Color3.fromRGB(45, 45, 45),
                     AutoButtonColor = false,
                     Text = "",
-                    Parent = toggleContainer
+                    Parent = toggleFrame
                 }, {
                     Serenity.Creator.New("UICorner", {
-                        CornerRadius = UDim.new(1, 0) -- Pill shape
+                        CornerRadius = UDim.new(0, 4)
                     }),
                     Serenity.Creator.New("UIStroke", {
                         Color = Color3.fromRGB(65, 65, 65),
@@ -827,24 +787,23 @@ return function(Serenity, Config)
                     })
                 })
 
-                -- Toggle knob with smooth animation
-                local toggleKnob = Serenity.Creator.New("Frame", {
-                    Name = "ToggleKnob",
-                    Size = UDim2.new(0, 18, 0, 18),
-                    Position = UDim2.new(0, 3, 0.5, -9),
-                    AnchorPoint = Vector2.new(0, 0.5),
-                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                -- Checkmark (original style)
+                local checkmark = Serenity.Creator.New("ImageLabel", {
+                    Name = "Checkmark",
+                    Size = UDim2.new(0, 14, 0, 14),
+                    Position = UDim2.new(0.5, -7, 0.5, -7),
+                    BackgroundTransparency = 1,
+                    Image = "rbxassetid://10734961420",
+                    ImageColor3 = Color3.fromRGB(255, 255, 255),
+                    Visible = false,
                     Parent = toggleBox
-                }, {
-                    Serenity.Creator.New("UICorner", {
-                        CornerRadius = UDim.new(1, 0)
-                    })
                 })
 
                 -- Toggle label
                 Serenity.Creator.New("TextLabel", {
                     Name = "Label",
-                    Size = UDim2.new(1, -60, 1, 0),
+                    Size = UDim2.new(1, -25, 1, 0),
+                    Position = UDim2.new(0, 25, 0, 0),
                     BackgroundTransparency = 1,
                     Text = toggleConfig.Title,
                     TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -852,26 +811,18 @@ return function(Serenity, Config)
                     Font = Enum.Font.GothamSemibold,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextYAlignment = Enum.TextYAlignment.Center,
-                    Parent = toggleContainer
+                    Parent = toggleFrame
                 })
 
                 local toggleValue = toggleConfig.Default or false
 
                 local function updateToggle()
                     if toggleValue then
-                        TweenService:Create(toggleKnob, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                            Position = UDim2.new(1, -21, 0.5, -9)
-                        }):Play()
-                        TweenService:Create(toggleBox, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                            BackgroundColor3 = Color3.fromRGB(120, 60, 220)
-                        }):Play()
+                        checkmark.Visible = true
+                        toggleBox.BackgroundColor3 = Color3.fromRGB(120, 60, 220)
                     else
-                        TweenService:Create(toggleKnob, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                            Position = UDim2.new(0, 3, 0.5, -9)
-                        }):Play()
-                        TweenService:Create(toggleBox, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                            BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-                        }):Play()
+                        checkmark.Visible = false
+                        toggleBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
                     end
                 end
 
@@ -885,17 +836,13 @@ return function(Serenity, Config)
 
                 toggleBox.MouseEnter:Connect(function()
                     if not toggleValue then
-                        TweenService:Create(toggleBox, TweenInfo.new(0.2), {
-                            BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-                        }):Play()
+                        toggleBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
                     end
                 end)
 
                 toggleBox.MouseLeave:Connect(function()
                     if not toggleValue then
-                        TweenService:Create(toggleBox, TweenInfo.new(0.2), {
-                            BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-                        }):Play()
+                        toggleBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
                     end
                 end)
 
@@ -916,7 +863,7 @@ return function(Serenity, Config)
 
             function section:AddButton(buttonConfig)
                 local buttonConfig = buttonConfig or {}
-                local position = buttonConfig.Position or 1 -- Use "Position" instead of "Column"
+                local position = buttonConfig.Position or 1
                 
                 -- Get or create button row
                 local row = getButtonRow(position)
@@ -931,11 +878,11 @@ return function(Serenity, Config)
                     end
                 end
                 
-                -- Create button with calculated width
+                -- Create button with gradient effect and border
                 local button = Serenity.Creator.New("TextButton", {
                     Name = buttonConfig.Title .. "Button",
                     Size = UDim2.new(buttonWidth, -4, 1, 0),
-                    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                    BackgroundColor3 = Color3.fromRGB(35, 35, 35),
                     Text = buttonConfig.Title,
                     TextColor3 = Color3.fromRGB(255, 255, 255),
                     TextSize = 14,
@@ -944,6 +891,17 @@ return function(Serenity, Config)
                 }, {
                     Serenity.Creator.New("UICorner", {
                         CornerRadius = UDim.new(0, 6)
+                    }),
+                    Serenity.Creator.New("UIStroke", {
+                        Color = Color3.fromRGB(100, 100, 100), -- Lighter grey border
+                        Thickness = 1
+                    }),
+                    -- Gradient effect using UIGradient
+                    Serenity.Creator.New("UIGradient", {
+                        Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 25)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 45, 45))
+                        })
                     })
                 })
 
@@ -951,12 +909,29 @@ return function(Serenity, Config)
                 table.insert(row.Buttons, button)
                 row.ButtonCount = row.ButtonCount + 1
 
+                -- Click animation
+                button.MouseButton1Down:Connect(function()
+                    TweenService:Create(button, TweenInfo.new(0.1), {
+                        BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                    }):Play()
+                end)
+
+                button.MouseButton1Up:Connect(function()
+                    TweenService:Create(button, TweenInfo.new(0.1), {
+                        BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                    }):Play()
+                end)
+
                 button.MouseEnter:Connect(function()
-                    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                    TweenService:Create(button, TweenInfo.new(0.2), {
+                        BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                    }):Play()
                 end)
 
                 button.MouseLeave:Connect(function()
-                    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                    TweenService:Create(button, TweenInfo.new(0.2), {
+                        BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                    }):Play()
                 end)
 
                 button.MouseButton1Click:Connect(function()
@@ -973,7 +948,7 @@ return function(Serenity, Config)
             return section
         end
 
-        -- Tab selection function (removed purple underline animation)
+        -- Tab selection function
         local function selectTab()
             for i = 1, #Window.OrderedTabs do
                 local otherTab = Window.OrderedTabs[i]
