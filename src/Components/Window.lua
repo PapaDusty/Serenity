@@ -34,6 +34,16 @@ return function(Serenity, Config)
         Icons = result
     end
 
+    -- Load executor detection
+    local ExecutorName = "Unknown"
+    local success, executorResult = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/GetExecutor.lua"))()
+    end)
+    
+    if success and type(executorResult) == "string" then
+        ExecutorName = executorResult
+    end
+
     -- Function to get icon
     local function getIcon(iconName)
         if not iconName or iconName == "" then
@@ -115,18 +125,46 @@ return function(Serenity, Config)
         Parent = TitleContainer
     })
 
-    -- Title text with purple gradient effect
+    -- Title text with animated color
     local TitleText = Serenity.Creator.New("TextLabel", {
         Name = "Title",
         AutomaticSize = Enum.AutomaticSize.X,
         BackgroundTransparency = 1,
-        Text = "<font color=\"#ea80fc\">s</font><font color=\"#d946ef\">e</font><font color=\"#c026d3\">r</font><font color=\"#a855f7\">e</font><font color=\"#9333ea\">n</font><font color=\"#7e22ce\">i</font><font color=\"#6b21a8\">t</font><font color=\"#581c87\">y</font><font color=\"#3b0764\">.</font><font color=\"#701a75\">w</font><font color=\"#86198f\">t</font><font color=\"#a21caf\">f</font>",
-        RichText = true,
+        Text = "serenity.wtf",
+        TextColor3 = Color3.fromRGB(180, 120, 255), -- Initial purple
         TextSize = 14,
         Font = Enum.Font.GothamBold,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = TitleContainer
     })
+
+    -- Color animation for title text
+    local colorPresets = {
+        Color3.fromRGB(180, 120, 255), -- Light purple
+        Color3.fromRGB(220, 100, 255), -- Bright purple
+        Color3.fromRGB(160, 80, 220),  -- Medium purple
+        Color3.fromRGB(200, 60, 220),  -- Pinkish purple
+        Color3.fromRGB(140, 100, 255), -- Blueish purple
+    }
+
+    local currentColorIndex = 1
+    local function animateTitleColor()
+        while true do
+            currentColorIndex = currentColorIndex + 1
+            if currentColorIndex > #colorPresets then
+                currentColorIndex = 1
+            end
+            
+            TweenService:Create(TitleText, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                TextColor3 = colorPresets[currentColorIndex]
+            }):Play()
+            
+            wait(2) -- Change color every 2 seconds
+        end
+    end
+
+    -- Start color animation
+    spawn(animateTitleColor)
 
     -- Subtitle (on the left)
     local SubTitleText = Serenity.Creator.New("TextLabel", {
@@ -273,36 +311,43 @@ return function(Serenity, Config)
         Parent = Window.InfoContainer
     })
 
-    -- Subtitle container (replaces GuestContainer)
-    local SubTitleContainer = Serenity.Creator.New("Frame", {
-        Name = "SubTitleContainer",
-        Size = UDim2.new(0, 80, 1, 0),
-        Position = UDim2.new(1, -90, 0, 0),
+    -- Executor container (replaces SubTitleContainer)
+    local ExecutorContainer = Serenity.Creator.New("Frame", {
+        Name = "ExecutorContainer",
+        Size = UDim2.new(0, 120, 1, 0),
+        Position = UDim2.new(1, -125, 0, 0),
         BackgroundTransparency = 1,
         Parent = Window.InfoContainer
+    }, {
+        Serenity.Creator.New("UIListLayout", {
+            FillDirection = Enum.FillDirection.Horizontal,
+            HorizontalAlignment = Enum.HorizontalAlignment.Right,
+            VerticalAlignment = Enum.VerticalAlignment.Center,
+            Padding = UDim.new(0, 5)
+        })
     })
 
-    -- Subtitle text (white and bold)
-    Serenity.Creator.New("TextLabel", {
-        Name = "SubTitleText",
-        Size = UDim2.new(1, 0, 1, 0),
+    -- Roblox icon for executor
+    local ExecutorIcon = Serenity.Creator.New("ImageLabel", {
+        Name = "ExecutorIcon",
+        Size = UDim2.new(0, 16, 0, 16),
         BackgroundTransparency = 1,
-        Text = Config.SubTitle or "v" .. Serenity.Version,
+        Image = "rbxassetid://118034688779559", -- Roblox icon
+        ImageColor3 = Color3.fromRGB(255, 255, 255),
+        Parent = ExecutorContainer
+    })
+
+    -- Executor text (white and bold) - no underline
+    Serenity.Creator.New("TextLabel", {
+        Name = "ExecutorText",
+        Size = UDim2.new(1, -20, 1, 0),
+        BackgroundTransparency = 1,
+        Text = ExecutorName,
         TextColor3 = Color3.fromRGB(255, 255, 255),
         TextSize = 12,
         Font = Enum.Font.GothamBold,
         TextXAlignment = Enum.TextXAlignment.Right,
-        Parent = SubTitleContainer
-    })
-
-    -- Manual underline
-    Serenity.Creator.New("Frame", {
-        Name = "Underline",
-        Size = UDim2.new(0.8, 0, 0, 1),
-        Position = UDim2.new(0.1, 0, 0.9, 0),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BorderSizePixel = 0,
-        Parent = SubTitleContainer
+        Parent = ExecutorContainer
     })
 
     -- Tab navigation area
