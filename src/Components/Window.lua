@@ -737,7 +737,7 @@ return function(Serenity, Config)
                         sectionFrame.Size = UDim2.new(1, -10, 0, elementsLayout.AbsoluteContentSize.Y + 45)
                     end
                 else
-                    sectionFrame.Size = UDim2.new(1, -10, 0, 40)
+                    sectionFrame.Size = UDim2.new(1, 3, 0, 40)
                 end
             end
 
