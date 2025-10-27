@@ -145,27 +145,20 @@ return function(Serenity, Config)
         Parent = TitleContainer
     })
 
-    -- Individual letter frames for animated title
-    local titleText = "serenity.wtf"
-    local letterFrames = {}
-    
-    for i = 1, #titleText do
-        local letter = string.sub(titleText, i, i)
-        local letterFrame = Serenity.Creator.New("TextLabel", {
-            Name = "Letter" .. i,
-            Size = UDim2.new(0, 8, 1, 0),
-            BackgroundTransparency = 1,
-            Text = letter,
-            TextColor3 = Color3.fromRGB(180, 120, 255),
-            TextSize = 14,
-            Font = Enum.Font.GothamBold,
-            TextXAlignment = Enum.TextXAlignment.Center,
-            Parent = TitleContainer
-        })
-        table.insert(letterFrames, letterFrame)
-    end
+    -- Title text with faster color animation
+    local TitleText = Serenity.Creator.New("TextLabel", {
+        Name = "Title",
+        AutomaticSize = Enum.AutomaticSize.X,
+        BackgroundTransparency = 1,
+        Text = "serenity.wtf",
+        TextColor3 = Color3.fromRGB(180, 120, 255), -- Initial purple
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = TitleContainer
+    })
 
-    -- Color animation for individual letters
+    -- Color animation for title text (faster)
     local colorPresets = {
         Color3.fromRGB(180, 120, 255), -- Light purple
         Color3.fromRGB(220, 100, 255), -- Bright purple
@@ -174,20 +167,24 @@ return function(Serenity, Config)
         Color3.fromRGB(140, 100, 255), -- Blueish purple
     }
 
-    local function animateLetters()
+    local currentColorIndex = 1
+    local function animateTitleColor()
         while true do
-            for i, letterFrame in ipairs(letterFrames) do
-                local colorIndex = ((i + os.clock() * 2) % #colorPresets) + 1
-                TweenService:Create(letterFrame, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    TextColor3 = colorPresets[math.floor(colorIndex)]
-                }):Play()
+            currentColorIndex = currentColorIndex + 1
+            if currentColorIndex > #colorPresets then
+                currentColorIndex = 1
             end
-            wait(0.1)
+            
+            TweenService:Create(TitleText, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                TextColor3 = colorPresets[currentColorIndex]
+            }):Play()
+            
+            wait(1) -- Change color every 1 second (faster)
         end
     end
 
-    -- Start letter animation
-    spawn(animateLetters)
+    -- Start color animation
+    spawn(animateTitleColor)
 
     -- Subtitle (on the left)
     local SubTitleText = Serenity.Creator.New("TextLabel", {
@@ -337,8 +334,8 @@ return function(Serenity, Config)
     -- Executor container (replaces SubTitleContainer)
     local ExecutorContainer = Serenity.Creator.New("Frame", {
         Name = "ExecutorContainer",
-        Size = UDim2.new(0, 140, 1, 0), -- Wider for bigger text
-        Position = UDim2.new(1, -145, 0, 0), -- More to the left
+        Size = UDim2.new(0, 160, 1, 0), -- Wider for bigger text
+        Position = UDim2.new(1, -165, 0, 0), -- More to the left
         BackgroundTransparency = 1,
         Parent = Window.InfoContainer
     }, {
@@ -356,7 +353,7 @@ return function(Serenity, Config)
     -- Executor icon (bigger)
     local ExecutorIcon = Serenity.Creator.New("ImageLabel", {
         Name = "ExecutorIcon",
-        Size = UDim2.new(0, 20, 0, 20), -- Bigger icon
+        Size = UDim2.new(0, 22, 0, 22), -- Bigger icon
         BackgroundTransparency = 1,
         Image = "rbxassetid://" .. executorIconId,
         ImageColor3 = Color3.fromRGB(255, 255, 255),
@@ -366,7 +363,7 @@ return function(Serenity, Config)
     -- Executor text (bigger and white)
     Serenity.Creator.New("TextLabel", {
         Name = "ExecutorText",
-        Size = UDim2.new(1, -26, 1, 0), -- Adjusted for bigger icon
+        Size = UDim2.new(1, -86, 1, 0), -- Fixed size
         BackgroundTransparency = 1,
         Text = ExecutorName,
         TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -949,7 +946,7 @@ return function(Serenity, Config)
                     end
                 end
                 
-                -- Create button with dark background and white text (no gradient)
+                -- Create button with dark background, white text, and border
                 local button = Serenity.Creator.New("TextButton", {
                     Name = buttonConfig.Title .. "Button",
                     Size = UDim2.new(buttonWidth, -4, 0.9, 0), -- Shorter height
