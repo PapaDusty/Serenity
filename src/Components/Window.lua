@@ -657,7 +657,7 @@ return function(Serenity, Config)
             
             local sectionFrame = Serenity.Creator.New("Frame", {
                 Name = sectionConfig.Title .. "Section",
-                Size = UDim2.new(1, -10, 0, 40),
+                Size = UDim2.new(1, 3, 0, 40),
                 BackgroundColor3 = Color3.fromRGB(21, 21, 21),
                 Parent = tabContent
             }, {
