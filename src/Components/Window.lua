@@ -34,42 +34,12 @@ return function(Serenity, Config)
         Icons = result
     end
 
-    -- Load executor assets
-    local ExecutorAssets = {}
-    local success, assetsResult = pcall(function()
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/Assets.lua"))()
-    end)
-    
-    if success and type(assetsResult) == "table" then
-        ExecutorAssets = assetsResult
-    end
-
-    -- Load executor detection
-    local ExecutorName = "Unknown"
-    local success, executorResult = pcall(function()
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/Serenity/main/src/GetExecutor.lua"))()
-    end)
-    
-    if success and type(executorResult) == "string" then
-        ExecutorName = executorResult
-    end
-
     -- Function to get icon
     local function getIcon(iconName)
         if not iconName or iconName == "" then
             return nil
         end
         return Icons[iconName]
-    end
-
-    -- Function to get executor icon ID
-    local function getExecutorIcon(executorName)
-        for name, iconId in pairs(ExecutorAssets) do
-            if string.find(executorName:lower(), name:lower()) then
-                return iconId
-            end
-        end
-        return "118034688779559" -- Default Roblox icon
     end
 
     -- Create main window
@@ -281,7 +251,7 @@ return function(Serenity, Config)
     -- Info Container (taller and properly rounded)
     Window.InfoContainer = Serenity.Creator.New("Frame", {
         Name = "InfoContainer",
-        Size = UDim2.new(1, 0, 0, 36),
+        Size = UDim2.new(1, -160, 0, 36), -- Stops at divider
         Position = UDim2.new(0, 0, 1, -36),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BorderSizePixel = 0,
@@ -331,52 +301,10 @@ return function(Serenity, Config)
         Parent = Window.InfoContainer
     })
 
-    -- Executor container (replaces SubTitleContainer)
-    local ExecutorContainer = Serenity.Creator.New("Frame", {
-        Name = "ExecutorContainer",
-        Size = UDim2.new(0, 160, 1, 0), -- Wider for bigger text
-        Position = UDim2.new(1, -165, 0, 0), -- More to the left
-        BackgroundTransparency = 1,
-        Parent = Window.InfoContainer
-    }, {
-        Serenity.Creator.New("UIListLayout", {
-            FillDirection = Enum.FillDirection.Horizontal,
-            HorizontalAlignment = Enum.HorizontalAlignment.Right,
-            VerticalAlignment = Enum.VerticalAlignment.Center,
-            Padding = UDim.new(0, 6) -- Closer spacing
-        })
-    })
-
-    -- Get executor icon ID
-    local executorIconId = getExecutorIcon(ExecutorName)
-
-    -- Executor icon (bigger)
-    local ExecutorIcon = Serenity.Creator.New("ImageLabel", {
-        Name = "ExecutorIcon",
-        Size = UDim2.new(0, 22, 0, 22), -- Bigger icon
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://" .. executorIconId,
-        ImageColor3 = Color3.fromRGB(255, 255, 255),
-        Parent = ExecutorContainer
-    })
-
-    -- Executor text (bigger and white)
-    Serenity.Creator.New("TextLabel", {
-        Name = "ExecutorText",
-        Size = UDim2.new(1, -86, 1, 0), -- Fixed size
-        BackgroundTransparency = 1,
-        Text = ExecutorName,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        TextSize = 14, -- Bigger text
-        Font = Enum.Font.GothamBold,
-        TextXAlignment = Enum.TextXAlignment.Right,
-        Parent = ExecutorContainer
-    })
-
     -- Tab navigation area
     Window.TabContainer = Serenity.Creator.New("Frame", {
         Name = "TabContainer",
-        Size = UDim2.new(0, Window.TabWidth, 1, -64),
+        Size = UDim2.new(0, 160, 1, -64), -- Wider to match new divider position
         Position = UDim2.fromOffset(0, 28),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
@@ -401,11 +329,11 @@ return function(Serenity, Config)
         })
     })
 
-    -- Vertical divider between tabs and content
+    -- Vertical divider between tabs and content (moved to the right)
     Window.Divider = Serenity.Creator.New("Frame", {
         Name = "Divider",
-        Size = UDim2.new(0, 1, 1, -64),
-        Position = UDim2.new(0, Window.TabWidth, 0, 28),
+        Size = UDim2.new(0, 1, 1, -28), -- Updated size
+        Position = UDim2.new(0, 160, 0, 28), -- Moved to the right
         BackgroundColor3 = Color3.fromRGB(55, 55, 55),
         BorderSizePixel = 0,
         Parent = Window.Root
@@ -414,8 +342,8 @@ return function(Serenity, Config)
     -- Content area
     Window.ContentContainer = Serenity.Creator.New("Frame", {
         Name = "ContentContainer",
-        Size = UDim2.new(1, -Window.TabWidth - 10, 1, -74),
-        Position = UDim2.new(0, Window.TabWidth + 5, 0, 38),
+        Size = UDim2.new(1, -165, 1, -74), -- Adjusted for new divider position
+        Position = UDim2.new(0, 165, 0, 38), -- Adjusted for new divider position
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
         Parent = Window.Root
@@ -512,8 +440,8 @@ return function(Serenity, Config)
     Window.OrderedTabs = {}
     Window.TabCount = 0
 
-    -- Track button rows for multi-column layout
-    local buttonRowTracker = {}
+    -- Track section rows for multi-column layout
+    local sectionRowTracker = {}
 
     function Window:AddTab(config)
         local tabConfig = config or {}
@@ -636,7 +564,9 @@ return function(Serenity, Config)
             Sections = {},
             Name = tabConfig.Title,
             Index = tabIndex,
-            IsSelected = (tabIndex == 1)
+            IsSelected = (tabIndex == 1),
+            CurrentRow = nil,
+            RowSections = {}
         }
 
         -- Update content size function
@@ -689,16 +619,63 @@ return function(Serenity, Config)
             return tabDivider
         end
 
+        -- Function to create a new section row
+        local function createSectionRow()
+            local rowFrame = Serenity.Creator.New("Frame", {
+                Name = "SectionRow",
+                Size = UDim2.new(1, 0, 0, 0), -- Height will be updated
+                BackgroundTransparency = 1,
+                Parent = tabContent
+            }, {
+                Serenity.Creator.New("UIListLayout", {
+                    FillDirection = Enum.FillDirection.Horizontal,
+                    Padding = UDim.new(0, 10)
+                })
+            })
+            
+            local row = {
+                Frame = rowFrame,
+                Sections = {},
+                SectionCount = 0
+            }
+            
+            table.insert(tab.RowSections, row)
+            tab.CurrentRow = row
+            return row
+        end
+
+        -- Function to get or create section row
+        local function getSectionRow(position)
+            if not tab.CurrentRow or tab.CurrentRow.SectionCount >= 2 then -- Max 2 sections per row
+                return createSectionRow()
+            end
+            return tab.CurrentRow
+        end
+
         function tab:AddSection(sectionConfig)
             local sectionConfig = sectionConfig or {}
             local isOpen = sectionConfig.Open ~= false
+            local position = sectionConfig.Position or 1
             
-            -- Updated section size from 0, -10, 0, 40 to 0, 3, 0, 40
+            -- Get or create section row
+            local row = getSectionRow(position)
+            
+            -- Calculate section width based on how many sections in the row
+            local sectionWidth = 1
+            if row.SectionCount > 0 then
+                sectionWidth = 1 / (row.SectionCount + 1)
+                -- Update existing sections in the row
+                for _, existingSection in pairs(row.Sections) do
+                    existingSection.Frame.Size = UDim2.new(sectionWidth, -5, 0, 40)
+                end
+            end
+            
+            -- Updated section size
             local sectionFrame = Serenity.Creator.New("Frame", {
                 Name = sectionConfig.Title .. "Section",
-                Size = UDim2.new(1, 3, 0, 40),
+                Size = UDim2.new(sectionWidth, -5, 0, 40),
                 BackgroundColor3 = Color3.fromRGB(21, 21, 21),
-                Parent = tabContent
+                Parent = row.Frame
             }, {
                 Serenity.Creator.New("UICorner", {
                     CornerRadius = UDim.new(0, 6)
@@ -773,11 +750,20 @@ return function(Serenity, Config)
                 if section.IsOpen then
                     local elementsLayout = elementsContainer:FindFirstChild("UIListLayout")
                     if elementsLayout then
-                        sectionFrame.Size = UDim2.new(1, 3, 0, elementsLayout.AbsoluteContentSize.Y + 45)
+                        sectionFrame.Size = UDim2.new(sectionWidth, -5, 0, elementsLayout.AbsoluteContentSize.Y + 45)
                     end
                 else
-                    sectionFrame.Size = UDim2.new(1, 3, 0, 40)
+                    sectionFrame.Size = UDim2.new(sectionWidth, -5, 0, 40)
                 end
+                
+                -- Update row height
+                local maxHeight = 40
+                for _, sec in pairs(row.Sections) do
+                    if sec.Frame.Size.Y.Offset > maxHeight then
+                        maxHeight = sec.Frame.Size.Y.Offset
+                    end
+                end
+                row.Frame.Size = UDim2.new(1, 0, 0, maxHeight)
             end
 
             local elementsLayout = elementsContainer:WaitForChild("UIListLayout")
@@ -808,15 +794,15 @@ return function(Serenity, Config)
                     })
                 })
                 
-                local row = {
+                local buttonRow = {
                     Frame = rowFrame,
                     Buttons = {},
                     ButtonCount = 0
                 }
                 
-                table.insert(section.RowElements, row)
-                section.CurrentRow = row
-                return row
+                table.insert(section.RowElements, buttonRow)
+                section.CurrentRow = buttonRow
+                return buttonRow
             end
 
             -- Function to get or create button row
@@ -835,16 +821,42 @@ return function(Serenity, Config)
                     Parent = elementsContainer
                 })
 
-                -- Toggle box (original checkbox style on the left)
+                -- Toggle container for layout
+                local toggleContainer = Serenity.Creator.New("Frame", {
+                    Name = "ToggleContainer",
+                    Size = UDim2.new(1, 0, 0, 30),
+                    BackgroundTransparency = 1,
+                    Parent = toggleFrame
+                }, {
+                    Serenity.Creator.New("UIListLayout", {
+                        FillDirection = Enum.FillDirection.Horizontal,
+                        HorizontalAlignment = Enum.HorizontalAlignment.Right,
+                        Padding = UDim.new(0, 10)
+                    })
+                })
+
+                -- Toggle label (on the left)
+                Serenity.Creator.New("TextLabel", {
+                    Name = "Label",
+                    Size = UDim2.new(1, -35, 1, 0),
+                    BackgroundTransparency = 1,
+                    Text = toggleConfig.Title,
+                    TextColor3 = Color3.fromRGB(255, 255, 255),
+                    TextSize = 14,
+                    Font = Enum.Font.GothamSemibold,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextYAlignment = Enum.TextYAlignment.Center,
+                    Parent = toggleContainer
+                })
+
+                -- Toggle box (on the right)
                 local toggleBox = Serenity.Creator.New("TextButton", {
                     Name = "ToggleBox",
                     Size = UDim2.new(0, 20, 0, 20),
-                    Position = UDim2.new(0, 0, 0.5, 0),
-                    AnchorPoint = Vector2.new(0, 0.5),
                     BackgroundColor3 = Color3.fromRGB(45, 45, 45),
                     AutoButtonColor = false,
                     Text = "",
-                    Parent = toggleFrame
+                    Parent = toggleContainer
                 }, {
                     Serenity.Creator.New("UICorner", {
                         CornerRadius = UDim.new(0, 4)
@@ -855,31 +867,16 @@ return function(Serenity, Config)
                     })
                 })
 
-                -- Checkmark (original style)
+                -- Checkmark
                 local checkmark = Serenity.Creator.New("ImageLabel", {
                     Name = "Checkmark",
                     Size = UDim2.new(0, 14, 0, 14),
                     Position = UDim2.new(0.5, -7, 0.5, -7),
                     BackgroundTransparency = 1,
-                    Image = "rbxassetid://10734961420",
+                    Image = "rbxassetid://132636289005348",
                     ImageColor3 = Color3.fromRGB(255, 255, 255),
                     Visible = false,
                     Parent = toggleBox
-                })
-
-                -- Toggle label
-                Serenity.Creator.New("TextLabel", {
-                    Name = "Label",
-                    Size = UDim2.new(1, -25, 1, 0),
-                    Position = UDim2.new(0, 25, 0, 0),
-                    BackgroundTransparency = 1,
-                    Text = toggleConfig.Title,
-                    TextColor3 = Color3.fromRGB(255, 255, 255),
-                    TextSize = 14,
-                    Font = Enum.Font.GothamSemibold,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    TextYAlignment = Enum.TextYAlignment.Center,
-                    Parent = toggleFrame
                 })
 
                 local toggleValue = toggleConfig.Default or false
@@ -942,7 +939,7 @@ return function(Serenity, Config)
                     buttonWidth = 1 / (row.ButtonCount + 1)
                     -- Update existing buttons in the row
                     for _, existingButton in pairs(row.Buttons) do
-                        existingButton.Size = UDim2.new(buttonWidth, -4, 0.9, 0) -- Shorter height
+                        existingButton.Size = UDim2.new(buttonWidth, -4, 0.9, 0)
                     end
                 end
                 
@@ -964,7 +961,6 @@ return function(Serenity, Config)
                         Color = Color3.fromRGB(100, 100, 100), -- Lighter grey border
                         Thickness = 1
                     })
-                    -- No UIGradient - removed gradient effect
                 })
 
                 -- Store button in row
@@ -1006,6 +1002,9 @@ return function(Serenity, Config)
                 return buttonObj
             end
 
+            -- Store section in row
+            table.insert(row.Sections, section)
+            row.SectionCount = row.SectionCount + 1
             table.insert(tab.Sections, section)
             return section
         end
