@@ -2,6 +2,7 @@ return function(Serenity, Config)
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
     local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
     local player = Players.LocalPlayer
     local mouse = player:GetMouse()
     local Camera = workspace.CurrentCamera
@@ -14,7 +15,11 @@ return function(Serenity, Config)
         TabWidth = 160,
         Tabs = {},
         CurrentTab = nil,
-        SelectedTab = 1
+        SelectedTab = 1,
+        SettingsOpen = false,
+        AcrylicMode = false,
+        BlurOutside = true,
+        UIKeybind = Enum.KeyCode.RightControl
     }
 
     Window.Position = UDim2.fromOffset(
@@ -49,12 +54,20 @@ return function(Serenity, Config)
         Parent = player:WaitForChild("PlayerGui")
     })
 
+    -- Blur effect for settings
+    local BlurEffect = Serenity.Creator.New("BlurEffect", {
+        Name = "BackgroundBlur",
+        Size = 0,
+        Parent = Window.ScreenGui
+    })
+
     -- Main container
     Window.Root = Serenity.Creator.New("Frame", {
         Name = "MainWindow",
         Size = Window.Size,
         Position = Window.Position,
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+        BackgroundTransparency = 0,
         BorderSizePixel = 0,
         ClipsDescendants = true,
         Parent = Window.ScreenGui
@@ -170,11 +183,11 @@ return function(Serenity, Config)
         Parent = TitleBar
     })
 
-    -- Control buttons (EXACTLY like before)
+    -- Control buttons
     local ButtonContainer = Serenity.Creator.New("Frame", {
         Name = "Controls",
-        Size = UDim2.new(0, 52, 0.85, 0),
-        Position = UDim2.new(1, -55, 0, 3),
+        Size = UDim2.new(0, 78, 0.85, 0),
+        Position = UDim2.new(1, -83, 0, 3),
         BackgroundTransparency = 1,
         Parent = TitleBar
     }, {
@@ -184,7 +197,39 @@ return function(Serenity, Config)
         })
     })
 
-    -- Minimize button with icon (EXACTLY like before)
+    -- Settings button with icon
+    local SettingsButton = Serenity.Creator.New("TextButton", {
+        Name = "Settings",
+        Size = UDim2.new(0, 22, 0, 22),
+        BackgroundTransparency = 1,
+        Text = "",
+        Parent = ButtonContainer
+    })
+
+    -- Settings button background
+    local SettingsButtonBg = Serenity.Creator.New("Frame", {
+        Name = "Background",
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        BackgroundTransparency = 1,
+        Parent = SettingsButton
+    }, {
+        Serenity.Creator.New("UICorner", {
+            CornerRadius = UDim.new(0, 4)
+        })
+    })
+
+    -- Settings icon
+    Serenity.Creator.New("ImageLabel", {
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(0.5, -8, 0.5, -8),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://123547191593412",
+        ImageColor3 = Color3.fromRGB(255, 255, 255),
+        Parent = SettingsButton
+    })
+
+    -- Minimize button with icon
     local MinButton = Serenity.Creator.New("TextButton", {
         Name = "Minimize",
         Size = UDim2.new(0, 22, 0, 22),
@@ -193,7 +238,7 @@ return function(Serenity, Config)
         Parent = ButtonContainer
     })
 
-    -- Minimize button background (EXACTLY like before)
+    -- Minimize button background
     local MinButtonBg = Serenity.Creator.New("Frame", {
         Name = "Background",
         Size = UDim2.new(1, 0, 1, 0),
@@ -206,7 +251,7 @@ return function(Serenity, Config)
         })
     })
 
-    -- Minimize icon (EXACTLY like before)
+    -- Minimize icon
     Serenity.Creator.New("ImageLabel", {
         Size = UDim2.new(0, 16, 0, 16),
         Position = UDim2.new(0.5, -8, 0.5, -8),
@@ -216,7 +261,7 @@ return function(Serenity, Config)
         Parent = MinButton
     })
 
-    -- Close button with icon (EXACTLY like before)
+    -- Close button with icon
     local CloseButton = Serenity.Creator.New("TextButton", {
         Name = "Close",
         Size = UDim2.new(0, 22, 0, 22),
@@ -225,7 +270,7 @@ return function(Serenity, Config)
         Parent = ButtonContainer
     })
 
-    -- Close button background (EXACTLY like before)
+    -- Close button background
     local CloseButtonBg = Serenity.Creator.New("Frame", {
         Name = "Background",
         Size = UDim2.new(1, 0, 1, 0),
@@ -238,7 +283,7 @@ return function(Serenity, Config)
         })
     })
 
-    -- Close icon (EXACTLY like before)
+    -- Close icon
     Serenity.Creator.New("ImageLabel", {
         Size = UDim2.new(0, 16, 0, 16),
         Position = UDim2.new(0.5, -8, 0.5, -8),
@@ -248,7 +293,7 @@ return function(Serenity, Config)
         Parent = CloseButton
     })
 
-    -- Info Container (taller and properly rounded)
+    -- Info Container
     Window.InfoContainer = Serenity.Creator.New("Frame", {
         Name = "InfoContainer",
         Size = UDim2.new(1, -160, 0, 36), -- Stops at divider
@@ -271,7 +316,7 @@ return function(Serenity, Config)
         Parent = Window.InfoContainer
     })
 
-    -- Player avatar (bigger)
+    -- Player avatar
     local Avatar = Serenity.Creator.New("ImageLabel", {
         Name = "Avatar",
         Size = UDim2.new(0, 28, 0, 28),
@@ -287,7 +332,7 @@ return function(Serenity, Config)
         })
     })
 
-    -- Player display name (bigger and bolder text)
+    -- Player display name
     Serenity.Creator.New("TextLabel", {
         Name = "PlayerName",
         Size = UDim2.new(0.5, -40, 1, 0),
@@ -304,7 +349,7 @@ return function(Serenity, Config)
     -- Tab navigation area
     Window.TabContainer = Serenity.Creator.New("Frame", {
         Name = "TabContainer",
-        Size = UDim2.new(0, 160, 1, -64), -- Wider to match new divider position
+        Size = UDim2.new(0, 160, 1, -64),
         Position = UDim2.fromOffset(0, 28),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
@@ -329,11 +374,11 @@ return function(Serenity, Config)
         })
     })
 
-    -- Vertical divider between tabs and content (moved to the right)
+    -- Vertical divider between tabs and content
     Window.Divider = Serenity.Creator.New("Frame", {
         Name = "Divider",
-        Size = UDim2.new(0, 1, 1, -28), -- Updated size
-        Position = UDim2.new(0, 160, 0, 28), -- Moved to the right
+        Size = UDim2.new(0, 1, 1, -28),
+        Position = UDim2.new(0, 160, 0, 28),
         BackgroundColor3 = Color3.fromRGB(55, 55, 55),
         BorderSizePixel = 0,
         Parent = Window.Root
@@ -342,11 +387,191 @@ return function(Serenity, Config)
     -- Content area
     Window.ContentContainer = Serenity.Creator.New("Frame", {
         Name = "ContentContainer",
-        Size = UDim2.new(1, -165, 1, -74), -- Adjusted for new divider position
-        Position = UDim2.new(0, 165, 0, 38), -- Adjusted for new divider position
+        Size = UDim2.new(1, -165, 1, -74),
+        Position = UDim2.new(0, 165, 0, 38),
         BackgroundColor3 = Color3.fromRGB(21, 21, 21),
         BackgroundTransparency = 1,
         Parent = Window.Root
+    })
+
+    -- Settings GUI
+    local SettingsGUI = Serenity.Creator.New("Frame", {
+        Name = "SettingsGUI",
+        Size = UDim2.new(0, 300, 0, 200),
+        Position = UDim2.new(0.5, -150, 0.5, -100),
+        BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+        BackgroundTransparency = 1,
+        Visible = false,
+        Parent = Window.Root
+    }, {
+        Serenity.Creator.New("UICorner", {
+            CornerRadius = UDim.new(0, 8)
+        }),
+        Serenity.Creator.New("UIStroke", {
+            Color = Color3.fromRGB(80, 80, 80),
+            Thickness = 2
+        })
+    })
+
+    -- Settings title
+    Serenity.Creator.New("TextLabel", {
+        Name = "SettingsTitle",
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundTransparency = 1,
+        Text = "Settings",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 18,
+        Font = Enum.Font.GothamBold,
+        Parent = SettingsGUI
+    })
+
+    -- Settings content
+    local SettingsContent = Serenity.Creator.New("Frame", {
+        Name = "SettingsContent",
+        Size = UDim2.new(1, -20, 1, -50),
+        Position = UDim2.new(0, 10, 0, 40),
+        BackgroundTransparency = 1,
+        Parent = SettingsGUI
+    }, {
+        Serenity.Creator.New("UIListLayout", {
+            Padding = UDim.new(0, 10)
+        })
+    })
+
+    -- Acrylic Mode Toggle
+    local AcrylicToggleFrame = Serenity.Creator.New("Frame", {
+        Name = "AcrylicToggle",
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundTransparency = 1,
+        Parent = SettingsContent
+    })
+
+    Serenity.Creator.New("TextLabel", {
+        Name = "AcrylicLabel",
+        Size = UDim2.new(0.7, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "Acrylic Mode",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 14,
+        Font = Enum.Font.GothamSemibold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = AcrylicToggleFrame
+    })
+
+    local AcrylicToggleBox = Serenity.Creator.New("TextButton", {
+        Name = "AcrylicToggleBox",
+        Size = UDim2.new(0, 20, 0, 20),
+        Position = UDim2.new(1, -25, 0.5, -10),
+        BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+        AutoButtonColor = false,
+        Text = "",
+        Parent = AcrylicToggleFrame
+    }, {
+        Serenity.Creator.New("UICorner", {
+            CornerRadius = UDim.new(0, 4)
+        }),
+        Serenity.Creator.New("UIStroke", {
+            Color = Color3.fromRGB(65, 65, 65),
+            Thickness = 1
+        })
+    })
+
+    local AcrylicCheckmark = Serenity.Creator.New("ImageLabel", {
+        Name = "AcrylicCheckmark",
+        Size = UDim2.new(0, 14, 0, 14),
+        Position = UDim2.new(0.5, -7, 0.5, -7),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://123547191593412",
+        ImageColor3 = Color3.fromRGB(180, 120, 255),
+        Visible = false,
+        Parent = AcrylicToggleBox
+    })
+
+    -- Blur Outside Toggle
+    local BlurToggleFrame = Serenity.Creator.New("Frame", {
+        Name = "BlurToggle",
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundTransparency = 1,
+        Parent = SettingsContent
+    })
+
+    Serenity.Creator.New("TextLabel", {
+        Name = "BlurLabel",
+        Size = UDim2.new(0.7, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "Blur Outside",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 14,
+        Font = Enum.Font.GothamSemibold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = BlurToggleFrame
+    })
+
+    local BlurToggleBox = Serenity.Creator.New("TextButton", {
+        Name = "BlurToggleBox",
+        Size = UDim2.new(0, 20, 0, 20),
+        Position = UDim2.new(1, -25, 0.5, -10),
+        BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+        AutoButtonColor = false,
+        Text = "",
+        Parent = BlurToggleFrame
+    }, {
+        Serenity.Creator.New("UICorner", {
+            CornerRadius = UDim.new(0, 4)
+        }),
+        Serenity.Creator.New("UIStroke", {
+            Color = Color3.fromRGB(65, 65, 65),
+            Thickness = 1
+        })
+    })
+
+    local BlurCheckmark = Serenity.Creator.New("ImageLabel", {
+        Name = "BlurCheckmark",
+        Size = UDim2.new(0, 14, 0, 14),
+        Position = UDim2.new(0.5, -7, 0.5, -7),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://123547191593412",
+        ImageColor3 = Color3.fromRGB(180, 120, 255),
+        Visible = true,
+        Parent = BlurToggleBox
+    })
+
+    -- Keybind setting
+    local KeybindFrame = Serenity.Creator.New("Frame", {
+        Name = "KeybindFrame",
+        Size = UDim2.new(1, 0, 0, 40),
+        BackgroundTransparency = 1,
+        Parent = SettingsContent
+    })
+
+    Serenity.Creator.New("TextLabel", {
+        Name = "KeybindLabel",
+        Size = UDim2.new(0.6, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "UI Keybind",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 14,
+        Font = Enum.Font.GothamSemibold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = KeybindFrame
+    })
+
+    local KeybindButton = Serenity.Creator.New("TextButton", {
+        Name = "KeybindButton",
+        Size = UDim2.new(0.3, 0, 0, 25),
+        Position = UDim2.new(0.7, 0, 0.5, -12),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+        BorderColor3 = Color3.fromRGB(100, 100, 100),
+        BorderSizePixel = 2,
+        Text = "RightControl",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 12,
+        Font = Enum.Font.GothamSemibold,
+        Parent = KeybindFrame
+    }, {
+        Serenity.Creator.New("UICorner", {
+            CornerRadius = UDim.new(0, 4)
+        })
     })
 
     -- Dragging functionality
@@ -387,30 +612,24 @@ return function(Serenity, Config)
         end
     end)
 
-    -- Button hover effects (EXACTLY like before)
-    MinButton.MouseEnter:Connect(function()
-        TweenService:Create(MinButtonBg, TweenInfo.new(0.2), {
-            BackgroundTransparency = 0
-        }):Play()
-    end)
+    -- Button hover effects
+    local function setupControlButton(button, bg)
+        button.MouseEnter:Connect(function()
+            TweenService:Create(bg, TweenInfo.new(0.2), {
+                BackgroundTransparency = 0
+            }):Play()
+        end)
 
-    MinButton.MouseLeave:Connect(function()
-        TweenService:Create(MinButtonBg, TweenInfo.new(0.2), {
-            BackgroundTransparency = 1
-        }):Play()
-    end)
+        button.MouseLeave:Connect(function()
+            TweenService:Create(bg, TweenInfo.new(0.2), {
+                BackgroundTransparency = 1
+            }):Play()
+        end)
+    end
 
-    CloseButton.MouseEnter:Connect(function()
-        TweenService:Create(CloseButtonBg, TweenInfo.new(0.2), {
-            BackgroundTransparency = 0
-        }):Play()
-    end)
-
-    CloseButton.MouseLeave:Connect(function()
-        TweenService:Create(CloseButtonBg, TweenInfo.new(0.2), {
-            BackgroundTransparency = 1
-        }):Play()
-    end)
+    setupControlButton(SettingsButton, SettingsButtonBg)
+    setupControlButton(MinButton, MinButtonBg)
+    setupControlButton(CloseButton, CloseButtonBg)
 
     -- Button functionality
     local destroyDebounce = false
@@ -423,6 +642,75 @@ return function(Serenity, Config)
 
     MinButton.MouseButton1Click:Connect(function()
         Window:Minimize()
+    end)
+
+    -- Settings button functionality
+    SettingsButton.MouseButton1Click:Connect(function()
+        Window:ToggleSettings()
+    end)
+
+    -- Settings toggle functionality
+    AcrylicToggleBox.MouseButton1Click:Connect(function()
+        Window.AcrylicMode = not Window.AcrylicMode
+        AcrylicCheckmark.Visible = Window.AcrylicMode
+        
+        if Window.AcrylicMode then
+            TweenService:Create(Window.Root, TweenInfo.new(0.3), {
+                BackgroundTransparency = 0.3
+            }):Play()
+            TweenService:Create(TitleBar, TweenInfo.new(0.3), {
+                BackgroundTransparency = 0.3
+            }):Play()
+            TweenService:Create(Window.InfoContainer, TweenInfo.new(0.3), {
+                BackgroundTransparency = 0.3
+            }):Play()
+        else
+            TweenService:Create(Window.Root, TweenInfo.new(0.3), {
+                BackgroundTransparency = 0
+            }):Play()
+            TweenService:Create(TitleBar, TweenInfo.new(0.3), {
+                BackgroundTransparency = 0
+            }):Play()
+            TweenService:Create(Window.InfoContainer, TweenInfo.new(0.3), {
+                BackgroundTransparency = 0
+            }):Play()
+        end
+    end)
+
+    BlurToggleBox.MouseButton1Click:Connect(function()
+        Window.BlurOutside = not Window.BlurOutside
+        BlurCheckmark.Visible = Window.BlurOutside
+        
+        if Window.SettingsOpen then
+            if Window.BlurOutside then
+                TweenService:Create(BlurEffect, TweenInfo.new(0.3), {
+                    Size = 10
+                }):Play()
+            else
+                TweenService:Create(BlurEffect, TweenInfo.new(0.3), {
+                    Size = 0
+                }):Play()
+            end
+        end
+    end)
+
+    -- Keybind functionality
+    local listeningForKeybind = false
+    KeybindButton.MouseButton1Click:Connect(function()
+        listeningForKeybind = true
+        KeybindButton.Text = "..."
+        KeybindButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    end)
+
+    UserInputService.InputBegan:Connect(function(input)
+        if listeningForKeybind and input.UserInputType == Enum.UserInputType.Keyboard then
+            listeningForKeybind = false
+            Window.UIKeybind = input.KeyCode
+            KeybindButton.Text = tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
+            KeybindButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        elseif input.KeyCode == Window.UIKeybind and not Window.SettingsOpen then
+            Window:Minimize()
+        end
     end)
 
     -- Update tab holder size
@@ -449,35 +737,23 @@ return function(Serenity, Config)
         -- Get icon
         local iconId = getIcon(tabConfig.Icon)
         
-        -- Create tab button with border and background
+        -- Create tab button
         local tabButton = Serenity.Creator.New("TextButton", {
             Name = tabConfig.Title .. "Tab",
-            Size = UDim2.new(1, -10, 0, 40),
-            BackgroundColor3 = Color3.fromRGB(35, 35, 35), -- Lighter grey background
+            Size = UDim2.new(1, 0, 0, 40),
+            BackgroundTransparency = 1,
             Text = "",
             LayoutOrder = tabIndex,
             Parent = Window.TabHolder
-        }, {
-            Serenity.Creator.New("UICorner", {
-                CornerRadius = UDim.new(0, 6)
-            }),
-            Serenity.Creator.New("UIStroke", {
-                Color = Color3.fromRGB(100, 100, 100), -- Light grey border
-                Thickness = 1
-            })
         })
 
-        -- Tab background for selection animation
+        -- Tab background
         local tabBackground = Serenity.Creator.New("Frame", {
             Name = "Background",
             Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+            BackgroundColor3 = Color3.fromRGB(21, 21, 21),
             BackgroundTransparency = 1,
             Parent = tabButton
-        }, {
-            Serenity.Creator.New("UICorner", {
-                CornerRadius = UDim.new(0, 6)
-            })
         })
 
         -- Calculate positions
@@ -522,7 +798,7 @@ return function(Serenity, Config)
             Parent = labelContainer
         })
 
-        -- Underline (removed animation, just static)
+        -- Underline
         local underline = Serenity.Creator.New("Frame", {
             Name = "Underline",
             Size = UDim2.new(0, 0, 0, 2),
@@ -612,10 +888,15 @@ return function(Serenity, Config)
             local sectionConfig = sectionConfig or {}
             local isOpen = sectionConfig.Open ~= false
             
-            -- Section frame with proper sizing
+            -- Calculate section width based on position
+            local sectionWidth = 1
+            if sectionConfig.Position then
+                sectionWidth = 0.48 -- Two sections side by side
+            end
+            
             local sectionFrame = Serenity.Creator.New("Frame", {
                 Name = sectionConfig.Title .. "Section",
-                Size = UDim2.new(1, 0, 0, 40), -- Full width by default
+                Size = UDim2.new(sectionWidth, -5, 0, 40),
                 BackgroundColor3 = Color3.fromRGB(21, 21, 21),
                 Parent = tabContent
             }, {
@@ -692,10 +973,10 @@ return function(Serenity, Config)
                 if section.IsOpen then
                     local elementsLayout = elementsContainer:FindFirstChild("UIListLayout")
                     if elementsLayout then
-                        sectionFrame.Size = UDim2.new(1, 0, 0, elementsLayout.AbsoluteContentSize.Y + 45)
+                        sectionFrame.Size = UDim2.new(sectionWidth, -5, 0, elementsLayout.AbsoluteContentSize.Y + 45)
                     end
                 else
-                    sectionFrame.Size = UDim2.new(1, 0, 0, 40)
+                    sectionFrame.Size = UDim2.new(sectionWidth, -5, 0, 40)
                 end
             end
 
@@ -717,7 +998,7 @@ return function(Serenity, Config)
             local function createButtonRow()
                 local rowFrame = Serenity.Creator.New("Frame", {
                     Name = "ButtonRow",
-                    Size = UDim2.new(1, 0, 0, 40), -- Normal height
+                    Size = UDim2.new(1, 0, 0, 36),
                     BackgroundTransparency = 1,
                     Parent = elementsContainer
                 }, {
@@ -786,7 +1067,7 @@ return function(Serenity, Config)
                 local toggleBox = Serenity.Creator.New("TextButton", {
                     Name = "ToggleBox",
                     Size = UDim2.new(0, 20, 0, 20),
-                    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                    BackgroundColor3 = Color3.fromRGB(21, 21, 21),
                     AutoButtonColor = false,
                     Text = "",
                     Parent = toggleContainer
@@ -800,14 +1081,14 @@ return function(Serenity, Config)
                     })
                 })
 
-                -- Checkmark
+                -- Checkmark with smooth animation
                 local checkmark = Serenity.Creator.New("ImageLabel", {
                     Name = "Checkmark",
                     Size = UDim2.new(0, 14, 0, 14),
                     Position = UDim2.new(0.5, -7, 0.5, -7),
                     BackgroundTransparency = 1,
-                    Image = "rbxassetid://10734961420",
-                    ImageColor3 = Color3.fromRGB(255, 255, 255),
+                    Image = "rbxassetid://123547191593412",
+                    ImageColor3 = Color3.fromRGB(180, 120, 255),
                     Visible = false,
                     Parent = toggleBox
                 })
@@ -816,11 +1097,20 @@ return function(Serenity, Config)
 
                 local function updateToggle()
                     if toggleValue then
+                        TweenService:Create(toggleBox, TweenInfo.new(0.2), {
+                            BackgroundColor3 = Color3.fromRGB(120, 60, 220)
+                        }):Play()
+                        TweenService:Create(checkmark, TweenInfo.new(0.2), {
+                            ImageTransparency = 0
+                        }):Play()
                         checkmark.Visible = true
-                        toggleBox.BackgroundColor3 = Color3.fromRGB(120, 60, 220)
                     else
-                        checkmark.Visible = false
-                        toggleBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                        TweenService:Create(toggleBox, TweenInfo.new(0.2), {
+                            BackgroundColor3 = Color3.fromRGB(21, 21, 21)
+                        }):Play()
+                        TweenService:Create(checkmark, TweenInfo.new(0.2), {
+                            ImageTransparency = 1
+                        }):Play()
                     end
                 end
 
@@ -835,7 +1125,7 @@ return function(Serenity, Config)
                 toggleBox.MouseEnter:Connect(function()
                     if not toggleValue then
                         TweenService:Create(toggleBox, TweenInfo.new(0.2), {
-                            BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+                            BackgroundColor3 = Color3.fromRGB(35, 35, 35)
                         }):Play()
                     end
                 end)
@@ -843,7 +1133,7 @@ return function(Serenity, Config)
                 toggleBox.MouseLeave:Connect(function()
                     if not toggleValue then
                         TweenService:Create(toggleBox, TweenInfo.new(0.2), {
-                            BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                            BackgroundColor3 = Color3.fromRGB(21, 21, 21)
                         }):Play()
                     end
                 end)
@@ -852,10 +1142,8 @@ return function(Serenity, Config)
 
                 local toggleObj = {}
                 function toggleObj:SetValue(value)
-                    if type(value) == "boolean" then
-                        toggleValue = value
-                        updateToggle()
-                    end
+                    toggleValue = value
+                    updateToggle()
                 end
 
                 function toggleObj:GetValue()
@@ -878,15 +1166,17 @@ return function(Serenity, Config)
                     buttonWidth = 1 / (row.ButtonCount + 1)
                     -- Update existing buttons in the row
                     for _, existingButton in pairs(row.Buttons) do
-                        existingButton.Size = UDim2.new(buttonWidth, -4, 1, 0)
+                        existingButton.Size = UDim2.new(buttonWidth, -4, 0.9, 0)
                     end
                 end
                 
-                -- Completely remade button with light grey border
+                -- Create button with proper border (like your example)
                 local button = Serenity.Creator.New("TextButton", {
                     Name = buttonConfig.Title .. "Button",
-                    Size = UDim2.new(buttonWidth, -4, 1, 0),
-                    BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+                    Size = UDim2.new(buttonWidth, -4, 0.9, 0),
+                    BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+                    BorderColor3 = Color3.fromRGB(100, 100, 100),
+                    BorderSizePixel = 2,
                     Text = buttonConfig.Title,
                     TextColor3 = Color3.fromRGB(255, 255, 255),
                     TextSize = 14,
@@ -895,10 +1185,6 @@ return function(Serenity, Config)
                 }, {
                     Serenity.Creator.New("UICorner", {
                         CornerRadius = UDim.new(0, 6)
-                    }),
-                    Serenity.Creator.New("UIStroke", {
-                        Color = Color3.fromRGB(120, 120, 120), -- Light grey border
-                        Thickness = 1
                     })
                 })
 
@@ -909,25 +1195,25 @@ return function(Serenity, Config)
                 -- Click animation
                 button.MouseButton1Down:Connect(function()
                     TweenService:Create(button, TweenInfo.new(0.1), {
-                        BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                        BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                     }):Play()
                 end)
 
                 button.MouseButton1Up:Connect(function()
                     TweenService:Create(button, TweenInfo.new(0.1), {
-                        BackgroundColor3 = Color3.fromRGB(21, 21, 21)
+                        BackgroundColor3 = Color3.fromRGB(30, 30, 30)
                     }):Play()
                 end)
 
                 button.MouseEnter:Connect(function()
                     TweenService:Create(button, TweenInfo.new(0.2), {
-                        BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                        BackgroundColor3 = Color3.fromRGB(40, 40, 40)
                     }):Play()
                 end)
 
                 button.MouseLeave:Connect(function()
                     TweenService:Create(button, TweenInfo.new(0.2), {
-                        BackgroundColor3 = Color3.fromRGB(21, 21, 21)
+                        BackgroundColor3 = Color3.fromRGB(30, 30, 30)
                     }):Play()
                 end)
 
@@ -945,45 +1231,28 @@ return function(Serenity, Config)
             return section
         end
 
-        -- Tab selection function with animations
+        -- Tab selection function with smooth animation
         local function selectTab()
             for i = 1, #Window.OrderedTabs do
                 local otherTab = Window.OrderedTabs[i]
                 if otherTab then
                     otherTab.Content.Visible = false
-                    otherTab.Label.TextColor3 = Color3.fromRGB(200, 200, 200)
-                    otherTab.Label.TextSize = 14
+                    TweenService:Create(otherTab.Label, TweenInfo.new(0.3), {
+                        TextColor3 = Color3.fromRGB(200, 200, 200),
+                        TextSize = 14
+                    }):Play()
                     otherTab.IsSelected = false
                     otherTab.Underline.BackgroundTransparency = 1
-                    
-                    -- Animate tab background and border
-                    TweenService:Create(otherTab.Button, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-                    }):Play()
-                    TweenService:Create(otherTab.Button.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        Color = Color3.fromRGB(100, 100, 100)
-                    }):Play()
                 end
             end
             
             tabContent.Visible = true
-            tab.IsSelected = true
-            
-            -- Animate text getting bigger
-            TweenService:Create(tab.Label, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TweenService:Create(tabLabel, TweenInfo.new(0.3), {
                 TextColor3 = Color3.fromRGB(255, 255, 255),
                 TextSize = 16
             }):Play()
-            
+            tab.IsSelected = true
             tab.Underline.BackgroundTransparency = 0
-            
-            -- Animate selected tab background and border
-            TweenService:Create(tab.Button, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            }):Play()
-            TweenService:Create(tab.Button.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Color = Color3.fromRGB(150, 150, 150)
-            }):Play()
             
             Window.SelectedTab = tabIndex
         end
@@ -999,6 +1268,34 @@ return function(Serenity, Config)
 
         updateTabHolderSize()
         return tab
+    end
+
+    -- Settings toggle function
+    function Window:ToggleSettings()
+        Window.SettingsOpen = not Window.SettingsOpen
+        
+        if Window.SettingsOpen then
+            SettingsGUI.Visible = true
+            TweenService:Create(SettingsGUI, TweenInfo.new(0.3), {
+                BackgroundTransparency = 0
+            }):Play()
+            
+            if Window.BlurOutside then
+                TweenService:Create(BlurEffect, TweenInfo.new(0.3), {
+                    Size = 10
+                }):Play()
+            end
+        else
+            TweenService:Create(SettingsGUI, TweenInfo.new(0.3), {
+                BackgroundTransparency = 1
+            }):Play()
+            TweenService:Create(BlurEffect, TweenInfo.new(0.3), {
+                Size = 0
+            }):Play()
+            
+            wait(0.3)
+            SettingsGUI.Visible = false
+        end
     end
 
     function Window:Minimize()
