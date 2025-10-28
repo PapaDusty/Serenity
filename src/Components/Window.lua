@@ -11,7 +11,7 @@ return function(Serenity, Config)
         Maximized = false,
         Size = Config.Size or UDim2.fromOffset(600, 360),
         CurrentPos = 0,
-        TabWidth = 140,
+        TabWidth = 160,
         Tabs = {},
         CurrentTab = nil,
         SelectedTab = 1
@@ -440,9 +440,6 @@ return function(Serenity, Config)
     Window.OrderedTabs = {}
     Window.TabCount = 0
 
-    -- Track section rows for multi-column layout
-    local sectionRowTracker = {}
-
     function Window:AddTab(config)
         local tabConfig = config or {}
         
@@ -452,23 +449,35 @@ return function(Serenity, Config)
         -- Get icon
         local iconId = getIcon(tabConfig.Icon)
         
-        -- Create tab button
+        -- Create tab button with border and background
         local tabButton = Serenity.Creator.New("TextButton", {
             Name = tabConfig.Title .. "Tab",
-            Size = UDim2.new(1, 0, 0, 40),
-            BackgroundTransparency = 1,
+            Size = UDim2.new(1, -10, 0, 40),
+            BackgroundColor3 = Color3.fromRGB(35, 35, 35), -- Lighter grey background
             Text = "",
             LayoutOrder = tabIndex,
             Parent = Window.TabHolder
+        }, {
+            Serenity.Creator.New("UICorner", {
+                CornerRadius = UDim.new(0, 6)
+            }),
+            Serenity.Creator.New("UIStroke", {
+                Color = Color3.fromRGB(100, 100, 100), -- Light grey border
+                Thickness = 1
+            })
         })
 
-        -- Tab background
+        -- Tab background for selection animation
         local tabBackground = Serenity.Creator.New("Frame", {
             Name = "Background",
             Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+            BackgroundColor3 = Color3.fromRGB(45, 45, 45),
             BackgroundTransparency = 1,
             Parent = tabButton
+        }, {
+            Serenity.Creator.New("UICorner", {
+                CornerRadius = UDim.new(0, 6)
+            })
         })
 
         -- Calculate positions
@@ -564,9 +573,7 @@ return function(Serenity, Config)
             Sections = {},
             Name = tabConfig.Title,
             Index = tabIndex,
-            IsSelected = (tabIndex == 1),
-            CurrentRow = nil,
-            RowSections = {}
+            IsSelected = (tabIndex == 1)
         }
 
         -- Update content size function
@@ -580,24 +587,6 @@ return function(Serenity, Config)
         local contentLayout = tabContent:WaitForChild("UIListLayout")
         contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateContentSize)
         updateContentSize()
-
-        -- Add divider element to tab content
-        function tab:AddDivider()
-            local divider = Serenity.Creator.New("Frame", {
-                Name = "Divider",
-                Size = UDim2.new(1, 0, 0, 1),
-                BackgroundColor3 = Color3.fromRGB(55, 55, 55),
-                BackgroundTransparency = 0.7,
-                BorderSizePixel = 0,
-                Parent = tabContent
-            }, {
-                Serenity.Creator.New("UICorner", {
-                    CornerRadius = UDim.new(1, 0)
-                })
-            })
-            
-            return divider
-        end
 
         -- Add tab divider
         function tab:AddTabDivider()
@@ -619,63 +608,16 @@ return function(Serenity, Config)
             return tabDivider
         end
 
-        -- Function to create a new section row
-        local function createSectionRow()
-            local rowFrame = Serenity.Creator.New("Frame", {
-                Name = "SectionRow",
-                Size = UDim2.new(1, 0, 0, 0), -- Height will be updated
-                BackgroundTransparency = 1,
-                Parent = tabContent
-            }, {
-                Serenity.Creator.New("UIListLayout", {
-                    FillDirection = Enum.FillDirection.Horizontal,
-                    Padding = UDim.new(0, 10)
-                })
-            })
-            
-            local row = {
-                Frame = rowFrame,
-                Sections = {},
-                SectionCount = 0
-            }
-            
-            table.insert(tab.RowSections, row)
-            tab.CurrentRow = row
-            return row
-        end
-
-        -- Function to get or create section row
-        local function getSectionRow(position)
-            if not tab.CurrentRow or tab.CurrentRow.SectionCount >= 2 then -- Max 2 sections per row
-                return createSectionRow()
-            end
-            return tab.CurrentRow
-        end
-
         function tab:AddSection(sectionConfig)
             local sectionConfig = sectionConfig or {}
             local isOpen = sectionConfig.Open ~= false
-            local position = sectionConfig.Position or 1
             
-            -- Get or create section row
-            local row = getSectionRow(position)
-            
-            -- Calculate section width based on how many sections in the row
-            local sectionWidth = 1
-            if row.SectionCount > 0 then
-                sectionWidth = 1 / (row.SectionCount + 1)
-                -- Update existing sections in the row
-                for _, existingSection in pairs(row.Sections) do
-                    existingSection.Frame.Size = UDim2.new(sectionWidth, -5, 0, 40)
-                end
-            end
-            
-            -- Updated section size
+            -- Section frame with proper sizing
             local sectionFrame = Serenity.Creator.New("Frame", {
                 Name = sectionConfig.Title .. "Section",
-                Size = UDim2.new(sectionWidth, -5, 0, 40),
+                Size = UDim2.new(1, 0, 0, 40), -- Full width by default
                 BackgroundColor3 = Color3.fromRGB(21, 21, 21),
-                Parent = row.Frame
+                Parent = tabContent
             }, {
                 Serenity.Creator.New("UICorner", {
                     CornerRadius = UDim.new(0, 6)
@@ -750,20 +692,11 @@ return function(Serenity, Config)
                 if section.IsOpen then
                     local elementsLayout = elementsContainer:FindFirstChild("UIListLayout")
                     if elementsLayout then
-                        sectionFrame.Size = UDim2.new(sectionWidth, -5, 0, elementsLayout.AbsoluteContentSize.Y + 45)
+                        sectionFrame.Size = UDim2.new(1, 0, 0, elementsLayout.AbsoluteContentSize.Y + 45)
                     end
                 else
-                    sectionFrame.Size = UDim2.new(sectionWidth, -5, 0, 40)
+                    sectionFrame.Size = UDim2.new(1, 0, 0, 40)
                 end
-                
-                -- Update row height
-                local maxHeight = 40
-                for _, sec in pairs(row.Sections) do
-                    if sec.Frame.Size.Y.Offset > maxHeight then
-                        maxHeight = sec.Frame.Size.Y.Offset
-                    end
-                end
-                row.Frame.Size = UDim2.new(1, 0, 0, maxHeight)
             end
 
             local elementsLayout = elementsContainer:WaitForChild("UIListLayout")
@@ -784,7 +717,7 @@ return function(Serenity, Config)
             local function createButtonRow()
                 local rowFrame = Serenity.Creator.New("Frame", {
                     Name = "ButtonRow",
-                    Size = UDim2.new(1, 0, 0, 36), -- Shorter height
+                    Size = UDim2.new(1, 0, 0, 40), -- Normal height
                     BackgroundTransparency = 1,
                     Parent = elementsContainer
                 }, {
@@ -794,15 +727,15 @@ return function(Serenity, Config)
                     })
                 })
                 
-                local buttonRow = {
+                local row = {
                     Frame = rowFrame,
                     Buttons = {},
                     ButtonCount = 0
                 }
                 
-                table.insert(section.RowElements, buttonRow)
-                section.CurrentRow = buttonRow
-                return buttonRow
+                table.insert(section.RowElements, row)
+                section.CurrentRow = row
+                return row
             end
 
             -- Function to get or create button row
@@ -901,13 +834,17 @@ return function(Serenity, Config)
 
                 toggleBox.MouseEnter:Connect(function()
                     if not toggleValue then
-                        toggleBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+                        TweenService:Create(toggleBox, TweenInfo.new(0.2), {
+                            BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+                        }):Play()
                     end
                 end)
 
                 toggleBox.MouseLeave:Connect(function()
                     if not toggleValue then
-                        toggleBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                        TweenService:Create(toggleBox, TweenInfo.new(0.2), {
+                            BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                        }):Play()
                     end
                 end)
 
@@ -915,8 +852,10 @@ return function(Serenity, Config)
 
                 local toggleObj = {}
                 function toggleObj:SetValue(value)
-                    toggleValue = value
-                    updateToggle()
+                    if type(value) == "boolean" then
+                        toggleValue = value
+                        updateToggle()
+                    end
                 end
 
                 function toggleObj:GetValue()
@@ -939,17 +878,17 @@ return function(Serenity, Config)
                     buttonWidth = 1 / (row.ButtonCount + 1)
                     -- Update existing buttons in the row
                     for _, existingButton in pairs(row.Buttons) do
-                        existingButton.Size = UDim2.new(buttonWidth, -4, 0.9, 0)
+                        existingButton.Size = UDim2.new(buttonWidth, -4, 1, 0)
                     end
                 end
                 
-                -- Create button with dark background, white text, and border
+                -- Completely remade button with light grey border
                 local button = Serenity.Creator.New("TextButton", {
                     Name = buttonConfig.Title .. "Button",
-                    Size = UDim2.new(buttonWidth, -4, 0.9, 0), -- Shorter height
-                    BackgroundColor3 = Color3.fromRGB(21, 21, 21), -- Dark background
+                    Size = UDim2.new(buttonWidth, -4, 1, 0),
+                    BackgroundColor3 = Color3.fromRGB(21, 21, 21),
                     Text = buttonConfig.Title,
-                    TextColor3 = Color3.fromRGB(255, 255, 255), -- White text
+                    TextColor3 = Color3.fromRGB(255, 255, 255),
                     TextSize = 14,
                     Font = Enum.Font.GothamSemibold,
                     Parent = row.Frame
@@ -958,7 +897,7 @@ return function(Serenity, Config)
                         CornerRadius = UDim.new(0, 6)
                     }),
                     Serenity.Creator.New("UIStroke", {
-                        Color = Color3.fromRGB(100, 100, 100), -- Lighter grey border
+                        Color = Color3.fromRGB(120, 120, 120), -- Light grey border
                         Thickness = 1
                     })
                 })
@@ -1002,14 +941,11 @@ return function(Serenity, Config)
                 return buttonObj
             end
 
-            -- Store section in row
-            table.insert(row.Sections, section)
-            row.SectionCount = row.SectionCount + 1
             table.insert(tab.Sections, section)
             return section
         end
 
-        -- Tab selection function
+        -- Tab selection function with animations
         local function selectTab()
             for i = 1, #Window.OrderedTabs do
                 local otherTab = Window.OrderedTabs[i]
@@ -1019,14 +955,35 @@ return function(Serenity, Config)
                     otherTab.Label.TextSize = 14
                     otherTab.IsSelected = false
                     otherTab.Underline.BackgroundTransparency = 1
+                    
+                    -- Animate tab background and border
+                    TweenService:Create(otherTab.Button, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                    }):Play()
+                    TweenService:Create(otherTab.Button.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Color = Color3.fromRGB(100, 100, 100)
+                    }):Play()
                 end
             end
             
             tabContent.Visible = true
-            tab.Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-            tab.Label.TextSize = 16
             tab.IsSelected = true
+            
+            -- Animate text getting bigger
+            TweenService:Create(tab.Label, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                TextSize = 16
+            }):Play()
+            
             tab.Underline.BackgroundTransparency = 0
+            
+            -- Animate selected tab background and border
+            TweenService:Create(tab.Button, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            }):Play()
+            TweenService:Create(tab.Button.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Color = Color3.fromRGB(150, 150, 150)
+            }):Play()
             
             Window.SelectedTab = tabIndex
         end
