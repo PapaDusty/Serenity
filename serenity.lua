@@ -1880,38 +1880,6 @@ local Library do
 				CornerRadius = UDimNew(0, 7)
 			})
 
-			-- Minimize button (now uses correct ID and positioned left of close)
-			Items["MinimizeButton"] = Instances:Create("ImageButton", {
-				Parent = Items["MainFrame"].Instance,
-				Image = "rbxassetid://129525679054227",  -- Correct minimize icon
-				BackgroundTransparency = 1,
-				AnchorPoint = Vector2New(1, 0),
-				Position = UDim2New(1, -40, 0, 10),      -- 40px from right
-				Size = UDim2New(0, 18, 0, 18),
-				ImageColor3 = FromRGB(255,255,255),
-				ZIndex = 10
-			})
-
-			-- Close button (now positioned rightmost)
-			Items["CloseButton"] = Instances:Create("ImageButton", {
-				Parent = Items["MainFrame"].Instance,
-				Image = "rbxassetid://94126783865996",    -- Close icon
-				BackgroundTransparency = 1,
-				AnchorPoint = Vector2New(1, 0),
-				Position = UDim2New(1, -10, 0, 7.5),       -- 10px from right
-				Size = UDim2New(0, 24, 0, 24),
-				ImageColor3 = FromRGB(255,255,255),
-				ZIndex = 10
-			})
-
-			Items["MinimizeButton"]:Connect("MouseButton1Click", function()
-				Window:SetOpen(false)
-			end)
-
-			Items["CloseButton"]:Connect("MouseButton1Click", function()
-				Library:Unload()
-			end)
-
 			-- Side panel width reduced to 180
 			Items["Side"] = Instances:Create("Frame", {
 				Parent = Items["MainFrame"].Instance,
