@@ -1,4 +1,3 @@
--- Load the library from GitHub (replace the URL with your raw GitHub link)
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/serenity/main/library.lua"))()
 
 local Window = Library:Window({
