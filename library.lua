@@ -3726,7 +3726,7 @@ local Library do
 
 		Library:RefreshConfigsList(ConfigsList)
 
-		local ThemingSection = Page:Section({Name = "Theming", Icon = "131595494666590", Side = 1})
+		local ThemingSection = Page:Section({Name = "Theming", Icon = "131595494666590", Side = 2})
 		for Index, Value in pairs(Library.Theme) do
 			ThemingSection:Label(Index):Colorpicker({
 				Flag = Index.."Theme",
