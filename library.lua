@@ -3665,70 +3665,33 @@ local Library do
 			end
 		})
 
-		ConfigsSection:Textbox({
-			Default = "",
-			Flag = "ConfigName",
-			Placeholder = "Config name",
-			Callback = function(Value)
-				ConfigName = Value
-			end
-		})
+		local ThemingSection = Page:Section({Name = "Theming", Icon = "131595494666590", Side = 2})
 
-		ConfigsSection:Button({
-			Name = "Create",
-			Callback = function()
-				if ConfigName and ConfigName ~= "" then
-					if not isfile(Library.Folders.Configs .. "/" .. ConfigName .. ".json") then
-						writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
-						Library:RefreshConfigsList(ConfigsList)
-					else
-						return
+		-- Theme dropdown
+		local themeNames = {}
+		for name, _ in pairs(Themes) do
+			table.insert(themeNames, name)
+		end
+
+		local themeDropdown = ThemingSection:Dropdown({
+			Name = "Theme Presets",
+			Items = themeNames,
+			Default = "Preset",
+			Callback = function(selected)
+				local newTheme = Themes[selected]
+				if newTheme then
+					for key, color in pairs(newTheme) do
+						if themeColorpickers[key] then
+							themeColorpickers[key]:Set(color)
+						end
 					end
 				end
 			end
 		})
 
-		ConfigsSection:Button({
-			Name = "Delete",
-			Callback = function()
-				if ConfigSelected then
-					Library:DeleteConfig(ConfigSelected)
-					Library:RefreshConfigsList(ConfigsList)
-				end
-			end
-		})
-
-		ConfigsSection:Button({
-			Name = "Load",
-			Callback = function()
-				if ConfigSelected then
-					Library:LoadConfig(readfile(Library.Folders.Configs .. "/" .. ConfigSelected))
-				end
-			end
-		})
-
-		ConfigsSection:Button({
-			Name = "Save",
-			Callback = function()
-				if ConfigName and ConfigName ~= "" then
-					writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
-					Library:RefreshConfigsList(ConfigsList)
-				end
-			end
-		})
-
-		ConfigsSection:Button({
-			Name = "Refresh",
-			Callback = function()
-				Library:RefreshConfigsList(ConfigsList)
-			end
-		})
-
-		Library:RefreshConfigsList(ConfigsList)
-
-		local ThemingSection = Page:Section({Name = "Theming", Icon = "131595494666590", Side = 2})
+		local themeColorpickers = {}
 		for Index, Value in pairs(Library.Theme) do
-			ThemingSection:Label(Index):Colorpicker({
+			local cp = ThemingSection:Label(Index):Colorpicker({
 				Flag = Index.."Theme",
 				Default = Value,
 				Callback = function(Value)
@@ -3736,6 +3699,7 @@ local Library do
 					Library:ChangeTheme(Index, Value)
 				end
 			})
+			themeColorpickers[Index] = cp 
 		end
 
 		local SettingsSection = Page:Section({Name = "Settings", Icon = "72732892493295", Side = 2})
@@ -3758,9 +3722,308 @@ local Library do
 		})
 	end
 
+	Library.Window = function(self, Data)
+		local StartTime = tick()
+		Data = Data or {}
+
+		local Window = {
+			Name = Data.Name or Data.name or "RoForge",  -- default name
+			SubTitle = Data.SubTitle or Data.subtitle or "Universal",
+			ExpiresIn = Data.ExpiresIn or Data.expiresin or " - Never",
+
+			Pages = {},
+			Items = {},
+			IsOpen = false
+		}
+
+		local Items = {} do
+			local FirstLetterOfName = StringSub(Window.Name, 1, 1)
+			Items["MainFrame"] = Instances:Create("Frame", {
+				Parent = Library.Holder.Instance,
+				Name = "\0",
+				AnchorPoint = Vector2New(0.5, 0.5),
+				Position = UDim2New(0.5, 0, 0.5, 0),
+				BorderColor3 = FromRGB(0, 0, 0),
+				Size = UDim2New(0, 798, 0, 599),
+				BorderSizePixel = 10,
+				ClipsDescendants = true,
+				BackgroundColor3 = FromRGB(16, 18, 18)
+			})  Items["MainFrame"]:AddToTheme({BackgroundColor3 = "Background"})
+
+			Items["MainFrame"]:MakeDraggable()
+			Items["MainFrame"]:MakeResizeable(Vector2New(Items["MainFrame"].Instance.AbsoluteSize.X, Items["MainFrame"].Instance.AbsoluteSize.Y), Vector2New(9999, 9999))
+
+			Instances:Create("UICorner", {
+				Parent = Items["MainFrame"].Instance,
+				Name = "\0",
+				CornerRadius = UDimNew(0, 7)
+			})
+
+			Items["MinimizeButton"] = Instances:Create("ImageButton", {
+				Parent = Items["MainFrame"].Instance,
+				Image = "rbxassetid://129525679054227",
+				BackgroundTransparency = 1,
+				AnchorPoint = Vector2New(1, 0),
+				Position = UDim2New(1, -40, 0, 10),
+				Size = UDim2New(0, 18, 0, 18),
+				ImageColor3 = FromRGB(255,255,255),
+				ZIndex = 10
+			})
+
+			Items["CloseButton"] = Instances:Create("ImageButton", {
+				Parent = Items["MainFrame"].Instance,
+				Image = "rbxassetid://94126783865996",
+				BackgroundTransparency = 1,
+				AnchorPoint = Vector2New(1, 0),
+				Position = UDim2New(1, -10, 0, 7.5),
+				Size = UDim2New(0, 24, 0, 24),
+				ImageColor3 = FromRGB(255,255,255),
+				ZIndex = 10
+			})
+
+			Items["MinimizeButton"]:Connect("MouseButton1Click", function()
+				Window:SetOpen(false)
+			end)
+
+			Items["CloseButton"]:Connect("MouseButton1Click", function()
+				Library:Unload()
+			end)
+
+			Items["Side"] = Instances:Create("Frame", {
+				Parent = Items["MainFrame"].Instance,
+				Name = "\0",
+				BackgroundTransparency = 1,
+				BorderColor3 = FromRGB(0, 0, 0),
+				Position = UDim2New(0, 0, 0, 0),
+				Size = UDim2New(0, 180, 1, 0),
+				BorderSizePixel = 0,
+				BackgroundColor3 = FromRGB(255, 255, 255)
+			})
+
+
+			Items["TitleText"] = Instances:Create("TextLabel", {
+				Parent = Items["Side"].Instance,
+				Name = "\0",
+				Font = Enum.Font.GothamBold, 
+				TextColor3 = FromRGB(255, 255, 255),
+				Text = Window.Name,
+				Size = UDim2New(0, 0, 0, 22),    
+				BackgroundTransparency = 1,
+				AnchorPoint = Vector2New(0.5, 0),
+				Position = UDim2New(0.5, 0, 0, 15), 
+				BorderSizePixel = 0,
+				AutomaticSize = Enum.AutomaticSize.X,
+				TextSize = 20,                    
+			})
+
+
+			Items["Underline"] = Instances:Create("Frame", {
+				Parent = Items["Side"].Instance,
+				Name = "\0",
+				BorderColor3 = FromRGB(0, 0, 0),
+				AnchorPoint = Vector2New(0.5, 0),
+				Position = UDim2New(0.5, 0, 0, 38), 
+				Size = UDim2New(0, 0, 0, 2),
+				BorderSizePixel = 0,
+				BackgroundColor3 = FromRGB(255, 255, 255)
+			}) Items["Underline"]:AddToTheme({BackgroundColor3 = "Accent"})
+
+
+			Items["TitleText"].Instance:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+				Items["Underline"].Instance.Size = UDim2New(0, Items["TitleText"].Instance.AbsoluteSize.X, 0, 2)
+			end)
+
+			Items["Pages"] = Instances:Create("Frame", {
+				Parent = Items["Side"].Instance,
+				Name = "\0",
+				BackgroundTransparency = 1,
+				Position = UDim2New(0, 0, 0, 55),
+				BorderColor3 = FromRGB(0, 0, 0),
+				Size = UDim2New(1, 0, 1, -80),
+				BorderSizePixel = 0,
+				BackgroundColor3 = FromRGB(255, 255, 255)
+			})
+
+			Instances:Create("UIListLayout", {
+				Parent = Items["Pages"].Instance,
+				Name = "\0",
+				Padding = UDimNew(0, 8),
+				SortOrder = Enum.SortOrder.LayoutOrder
+			})
+
+			Instances:Create("UIPadding", {
+				Parent = Items["Pages"].Instance,
+				Name = "\0",
+				PaddingLeft = UDimNew(0, 8)
+			})
+
+			Items["Content"] = Instances:Create("Frame", {
+				Parent = Items["MainFrame"].Instance,
+				Name = "\0",
+				Position = UDim2New(0, 185, 0, 6),
+				BorderColor3 = FromRGB(0, 0, 0),
+				Size = UDim2New(1, -191, 1, -12),
+				BorderSizePixel = 0,
+				BackgroundColor3 = FromRGB(21, 24, 24)
+			})  Items["Content"]:AddToTheme({BackgroundColor3 = "Inline"})
+
+			Instances:Create("UICorner", {
+				Parent = Items["Content"].Instance,
+				Name = "\0",
+				CornerRadius = UDimNew(0, 7)
+			})
+
+			Instances:Create("UIStroke", {
+				Parent = Items["Content"].Instance,
+				Name = "\0",
+				Color = FromRGB(30, 33, 33),
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			}):AddToTheme({Color = "Border"})
+
+			Items["Bottom_"] = Instances:Create("Frame", { --yeah yeah ik ik 
+				Parent = Items["Side"].Instance,
+				Name = "\0",
+				AnchorPoint = Vector2New(0, 1),
+				Position = UDim2New(0, 6, 1, -6),
+				BorderColor3 = FromRGB(0, 0, 0),
+				Size = UDim2New(1, -8, 0, 50), 
+				BorderSizePixel = 0,
+				BackgroundColor3 = FromRGB(21, 24, 24)
+			})  Items["Bottom_"]:AddToTheme({BackgroundColor3 = "Inline"})
+
+			Instances:Create("UICorner", {
+				Parent = Items["Bottom_"].Instance,
+				Name = "\0",
+				CornerRadius = UDimNew(0, 7)
+			})
+
+			Instances:Create("UIStroke", {
+				Parent = Items["Bottom_"].Instance,
+				Name = "\0",
+				Color = FromRGB(30, 33, 33),
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			}):AddToTheme({Color = "Border"})
+
+			local userId = LocalPlayer.UserId
+			local avatarUrl = "rbxthumb://type=AvatarHeadShot&id="..userId.."&w=48&h=48"
+			Items["Avatar"] = Instances:Create("ImageLabel", {
+				Parent = Items["Bottom_"].Instance,
+				Name = "\0",
+				Image = avatarUrl,
+				BackgroundColor3 = FromRGB(255,255,255),
+				BackgroundTransparency = 1,
+				BorderColor3 = FromRGB(0,0,0),
+				BorderSizePixel = 0,
+				Size = UDim2New(0, 24, 0, 24),
+				Position = UDim2New(0, 4, 0, 4),
+			})
+			Instances:Create("UICorner", {
+				Parent = Items["Avatar"].Instance,
+				CornerRadius = UDimNew(1, 0) 
+			})
+
+			local displayName = LocalPlayer.DisplayName
+			Items["DisplayName"] = Instances:Create("TextLabel", {
+				Parent = Items["Bottom_"].Instance,
+				Name = "\0",
+				FontFace = Library.Font,
+				TextColor3 = FromRGB(255, 255, 255),
+				Text = "" .. displayName,
+				Size = UDim2New(0, 0, 0, 15),
+				BackgroundTransparency = 1,
+				Position = UDim2New(0, 30, 0, 8),
+				BorderSizePixel = 0,
+				AutomaticSize = Enum.AutomaticSize.X,
+				TextSize = 16,
+				BackgroundColor3 = FromRGB(255, 255, 255)
+			})
+
+
+			local GameName = "Unknown"
+			local Success, ProductInfo = pcall(function()
+				return MarketplaceService:GetProductInfo(game.PlaceId)
+			end)
+			if Success and ProductInfo and ProductInfo.Name then
+				GameName = ProductInfo.Name
+			end
+
+			Items["GameName"] = Instances:Create("TextLabel", {
+				Parent = Items["Bottom_"].Instance,
+				Name = "\0",
+				FontFace = Library.Font,
+				TextColor3 = FromRGB(255, 255, 255),
+				TextTransparency = 0.5,
+				BorderColor3 = FromRGB(0, 0, 0),
+				Text = GameName,
+				Size = UDim2New(0, 0, 0, 15),
+				BackgroundTransparency = 1,
+				Position = UDim2New(0, 10, 0, 30), 
+				BorderSizePixel = 0,
+				AutomaticSize = Enum.AutomaticSize.X,
+				TextSize = 12,
+				BackgroundColor3 = FromRGB(255, 255, 255)
+			})
+
+			Window.Items = Items
+		end
+
+		local Debounce = false
+
+		function Window:SetCenter()
+			local CenterPosition = Items["MainFrame"].Instance.AbsolutePosition
+			task.wait()
+			Items["MainFrame"].Instance.AnchorPoint = Vector2New(0, 0)
+			Items["MainFrame"].Instance.Position = UDim2New(0, CenterPosition.X, 0, CenterPosition.Y)
+		end
+
+		function Window:SetOpen(Bool)
+			if Debounce then return end
+			Window.IsOpen = Bool
+			Debounce = true
+
+			if Window.IsOpen then
+				Items["MainFrame"].Instance.Visible = true
+			end
+
+			local Descendants = Items["MainFrame"].Instance:GetDescendants()
+			TableInsert(Descendants, Items["MainFrame"].Instance)
+
+			local NewTween
+
+			for Index, Value in ipairs(Descendants) do
+				local TransparencyProperty = Tween:GetProperty(Value)
+				if not TransparencyProperty then continue end
+
+				if type(TransparencyProperty) == "table" then
+					for _, Property in ipairs(TransparencyProperty) do
+						NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
+					end
+				else
+					NewTween = Tween:FadeItem(Value, TransparencyProperty, Bool, Library.FadeSpeed)
+				end
+			end
+
+			NewTween.Tween.Completed:Connect(function()
+				Debounce = false
+				Items["MainFrame"].Instance.Visible = Window.IsOpen
+			end)
+		end
+
+		Library:Connect(UserInputService.InputBegan, function(Input)
+			if tostring(Input.KeyCode) == Library.MenuKeybind or tostring(Input.UserInputType) == Library.MenuKeybind then
+				Window:SetOpen(not Window.IsOpen)
+			end
+		end)
+
+		Window:SetCenter()
+		task.wait()
+		Window:SetOpen(true)
+		return setmetatable(Window, Library)
+	end
+
 	-- Example 
-	--[[
-	local Window = Library:Window({Name = "serenity.wtf", SubTitle = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name})
+    --[[
+	local Window = Library:Window({Name = "RoForge", SubTitle = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name})
 
 	Window:Category("penis")
 	local CombatPage = Window:Page({Name = "Page", Icon = "136879043989014"})
