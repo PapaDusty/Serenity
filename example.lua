@@ -1,9 +1,7 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/PapaDusty/serenity/main/library.lua"))()
 
 local Window = Library:Window({
-    Name = "My Script",
-    SubTitle = "Example",
-    ExpiresIn = " - Never"
+    Name = "RoForge",
 })
 
 local MainPage = Window:Page({
