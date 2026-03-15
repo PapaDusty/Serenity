@@ -1851,8 +1851,6 @@ local Library do
 
 			local Window = {
 				Name = Data.Name or Data.name or "Window",
-				SubTitle = Data.SubTitle or Data.subtitle or "Universal",
-				ExpiresIn = Data.ExpiresIn or Data.expiresin or " - Never",
 
 				Pages = {},
 				Items = {},
@@ -2032,22 +2030,6 @@ local Library do
 					Color = FromRGB(30, 33, 33),
 					ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 				}):AddToTheme({Color = "Border"})
-
-				Items["SubExpires"] = Instances:Create("TextLabel", {
-					Parent = Items["Bottom_"].Instance,
-					Name = "\0",
-					FontFace = Library.Font,
-					TextColor3 = FromRGB(255, 255, 255),
-					Text = "Expires in"..Window.ExpiresIn,
-					Size = UDim2New(0, 0, 0, 15),
-					BorderSizePixel = 0,
-					BackgroundTransparency = 1,
-					Position = UDim2New(0, 10, 0, 8),
-					BorderColor3 = FromRGB(0, 0, 0),
-					AutomaticSize = Enum.AutomaticSize.X,
-					TextSize = 12,
-					BackgroundColor3 = FromRGB(255, 255, 255)
-				})
 
 				local GameName = "Unknown"
 				local Success, ProductInfo = pcall(function()
@@ -3728,8 +3710,6 @@ local Library do
 
 		local Window = {
 			Name = Data.Name or Data.name or "RoForge",  -- default name
-			SubTitle = Data.SubTitle or Data.subtitle or "Universal",
-			ExpiresIn = Data.ExpiresIn or Data.expiresin or " - Never",
 
 			Pages = {},
 			Items = {},
@@ -4022,8 +4002,8 @@ local Library do
 	end
 
 	-- Example 
-    --[[
-	local Window = Library:Window({Name = "RoForge", SubTitle = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name})
+--[[
+	local Window = Library:Window({Name = "RoForge"})
 
 	Window:Category("penis")
 	local CombatPage = Window:Page({Name = "Page", Icon = "136879043989014"})
@@ -4078,7 +4058,7 @@ local Library do
 
 	Library:Notification("Notification without icon", 5, nil)
 	Library:Notification("Notification with icon", 5, "94627324690861")
-	]]
+]]
 
 	getgenv().Library = Library
 	return Library
